@@ -189,6 +189,12 @@ Historias de usuario por épica
     1. README actualizado con comandos PowerShell para ejecutar tests y la app.
     2. `doc/ci.md`, `doc/deploy.md` y `doc/test-cases.md` (mínimos) presentes.
     3. Instrucciones reproducibles para añadir credenciales localmente (sin subirlas al repo).
+    4. La documentación a entregar deberá incluir, como mínimo, los siguientes documentos ubicados en `doc/`:
+       - `doc/manual-usuario.md` — Manual de usuario: instrucciones de uso, casos de uso, ejemplos paso a paso y FAQ orientada a usuarios finales.
+       - `doc/manual-tecnico.md` — Manual técnico del proyecto: arquitectura, diagramas, contratos (API/repositorio), configuración, despliegue y guía de desarrollo.
+       - `doc/reglamento-inazumago.md` — Reglamento completo de InazumaGo: reglas del juego, validaciones, políticas de turno, dedupe y restricciones aplicables.
+       - README completo que enlace a estos documentos o que los contenga íntegramente (índice principal del proyecto).
+    5. Cada documento debe incluir un índice/tabla de contenido, número de versión y sección de pasos reproducibles para demos locales; además, el README debe apuntar claramente a cada documento y a los scripts/recursos necesarios para ejecutar las demos.
   - Estimación: S
   - Dependencias: E1-US1, E4-US1, E5-US1
   - Equipo: Motor, UI, DevOps
@@ -478,15 +484,24 @@ A continuación cada historia de usuario se descompone en tareas lo más pequeñ
   - Est. 2h
 
 (E6-US1) README y onboarding
-- E6-US1-T1 (DevOps/QA): Actualizar README con comandos PowerShell para ejecutar tests y la app (incluir `use-user-jdk.ps1` si procede).
-  - AC: README con comandos verificados y ejemplos.
-  - Est. 1h
+- E6-US1-T1 (DevOps/QA): Actualizar README con comandos PowerShell para ejecutar tests y la app (incluir `use-user-jdk.ps1` si procede). Además el README deberá contener un índice o enlazar claramente a los documentos en `doc/` (manual de usuario, manual técnico y reglamento) y a los scripts necesarios para demos locales.
+  - AC: README verificado con comandos reproducibles, índice o enlaces a `doc/manual-usuario.md`, `doc/manual-tecnico.md` y `doc/reglamento-inazumago.md`, y referencia a los scripts en `scripts/`.
+  - Est. 1.5h
 - E6-US1-T2 (QA): Crear `doc/ci.md` con pasos locales para ejecutar pipeline y tests.
   - AC: Documento reproducible y referenciado desde README.
   - Est. 1.5h
 - E6-US1-T3 (QA): Añadir `doc/test-cases.md` con los casos de integración descritos y pasos de verificación.
   - AC: Documento con pasos para cada escenario (optimistic, rollback, conflict, dedupe).
   - Est. 2h
+- E6-US1-T4 (Doc): Crear `doc/manual-usuario.md` (plantilla y contenido inicial) con tabla de contenido, número de versión, instrucciones de uso, casos de uso, ejemplos paso a paso, FAQ y pasos reproducibles para demo local.
+  - AC: Archivo `doc/manual-usuario.md` presente con TOC, versión y al menos una guía paso a paso para una demo local (usar `scripts/run-tests.ps1` y demo de `Main.main()`).
+  - Est. 3h
+- E6-US1-T5 (Doc): Crear `doc/manual-tecnico.md` (plantilla y contenido inicial) que incluya arquitectura, diagramas (o referencias a imágenes), contratos API/repositorio, configuración (`application.properties`), despliegue y guía de desarrollo con pasos reproducibles.
+  - AC: Archivo `doc/manual-tecnico.md` presente con TOC, versión, secciones de arquitectura y guía de despliegue/local; enlaces a `config/AppConfig` y `application.properties`.
+  - Est. 4h
+- E6-US1-T6 (Doc): Crear `doc/reglamento-inazumago.md` (plantilla y contenido inicial) con reglas del juego, validaciones, políticas de turno, dedupe por `clientNonce`, y ejemplos de reglas RTDB en JSON o pseudocódigo.
+  - AC: Archivo `doc/reglamento-inazumago.md` presente con TOC, versión y sección que incluya al menos un ejemplo de regla (pseudocódigo o JSON) y referencia a `doc/rules/firebase-rtdb-rules.json` si aplica.
+  - Est. 3h
 
 ---
 

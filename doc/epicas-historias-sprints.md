@@ -195,7 +195,9 @@ Historias de usuario por épica
 
 Plan de sprints (4 sprints — 2 semanas cada uno)
 
-Sprint 1 (Semanas 1-2) — Fundación & Build verde
+- Nota: Los días de trabajo efectivos serán los martes y los miércoles; sin embargo, los sprints se presentan como semanas completas.
+
+Sprint 1 (16–26 de marzo) — Fundación & Build verde
 
 - Objetivo del sprint: Establecer base de código con tests y servicio básico; build verde.
 - Historias asignadas:
@@ -212,7 +214,7 @@ Sprint 1 (Semanas 1-2) — Fundación & Build verde
   - QA: Reporte de pruebas unitarias y checklist de pruebas a ejecutar en siguientes sprints.
 - Criterio de demo: `mvn test` y `mvn package` pasan; demo local que muestre salida de `Main.main()` y tests verdes.
 
-Sprint 2 (Semanas 3-4) — Repositorios y UI esqueleto
+Sprint 2 (7–16 de abril) — Repositorios y UI esqueleto
 
 - Objetivo del sprint: Implementar AuthService (mock), UI interacción básica (saludo) y stub de repositorio Firebase.
 - Historias asignadas:
@@ -229,7 +231,7 @@ Sprint 2 (Semanas 3-4) — Repositorios y UI esqueleto
   - QA: Casos de prueba de integración e informe.
 - Criterio de demo: App arranca (JavaFX), muestra saludo; login simulado funciona; pipeline CI ejecuta tests automáticamente en PR.
 
-Sprint 3 (Semanas 5-6) — Integración Firebase (staging模拟)
+Sprint 3 (20–29 de abril) — Integración Firebase (staging)
 
 - Objetivo del sprint: Implementar cliente HTTP configurable para Firebase, login UI con token y pruebas de integración más sólidas.
 - Historias asignadas:
@@ -246,7 +248,7 @@ Sprint 3 (Semanas 5-6) — Integración Firebase (staging模拟)
   - QA: Test suite de integración en CI con stubs.
 - Criterio de demo: Demo mostrando login → token → fetch de datos simulado; tests de integración en CI.
 
-Sprint 4 (Semanas 7-8) — Pulido, QA y Release
+Sprint 4 (4–15 de mayo) — Pulido, QA y Release
 
 - Objetivo del sprint: Pulir, completar tests, pipeline completo y empaquetado de release candidate.
 - Historias asignadas:

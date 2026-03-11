@@ -1,4 +1,4 @@
-# InazumaGo
+# Inazuma Go
 Este repositorio contiene el proyecto InazumaGo (Java + Maven).
 
 - Para desarrollo local con PowerShell, puedes usar `doc/ia/user-prompt.md` para poner la ruta al JDK en la sesión.

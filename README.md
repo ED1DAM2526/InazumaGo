@@ -9,6 +9,8 @@ Notas rápidas:
 - `doc/ia/system-prompt.md` — Prompt de sistema que deben leer los asistentes/IA al trabajar en este repositorio.
 Documentación importante:
 
+- `doc/normas-trabajo-proyecto.md` — Normas de trabajo del proyecto: flujo de ramas, PR, revisiones, merges, incidencias, hotfix y criterios de cierre.
+
 Cómo compilar y probar
 
 En PowerShell (Windows):

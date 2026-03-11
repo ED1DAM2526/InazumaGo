@@ -13,6 +13,18 @@ Resumen del proyecto
   - `src/main/resources/`
   - `doc/ia/` (documentación y prompts para agentes)
 
+Diagrama de aplicación (archivo)
+- Ruta: `doc/diagram-app.puml`.
+- Propósito: diagrama PlantUML que representa la arquitectura cliente (escritorio) actual. Debe leerse junto con este fichero para entender componentes y dependencias.
+- Resumen del diagrama: actor "Interfaz de Usuario (Escritorio/CLI)" → `Main` (punto de entrada) → `Controllers` → `Service` → `Repository` (p. ej. `InMemoryMainRepository`) y componentes auxiliares (DTO/Mapper, Model, Util, Excepciones). No asume una API HTTP/REST ni que los controladores expongan endpoints remotos; los controladores coordinan la interacción entre la UI y la lógica de negocio.
+
+Aclaración importante sobre persistencia:
+- Firebase Realtime Database es la persistencia principal y de producción prevista por el proyecto. En el diagrama, la nube `Firebase Realtime DB` representa la base de datos en línea que debe usarse como almacenamiento definitivo.
+- Las implementaciones `InMemoryMainRepository` u otras implementaciones en memoria son únicamente para pruebas, simulación o desarrollo local. NO deben usarse como sustituto de Firebase en entornos de producción.
+- Si en alguna parte del diagrama aparece la palabra "opcional" respecto a Firebase, debe interpretarse como "opcional para pruebas/simulación" y **no** como una recomendación de producción.
+
+Nota importante: si el diagrama o el código se modifican (por ejemplo, añadir una API REST o convertir el cliente en un servicio), actualizar `doc/diagram-app.puml` y dejar constancia en este fichero (`doc/ia/project-context.md` si procede).
+
 Objetivos para el asistente
 - Entender el contexto del repositorio antes de proponer o aplicar cambios.
 - Priorizar cambios que mantengan la compilación limpia, añadan/testeen funcionalidad y sigan las convenciones Java/OpenJDK.

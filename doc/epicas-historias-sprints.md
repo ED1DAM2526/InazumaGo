@@ -15,6 +15,14 @@ Suposiciones aplicadas
   - Red: 5 miembros (incluido jefe de equipo) — responsable de repositorios, cliente HTTP y comunicaciones (Firebase).
   - DevOps: 4 miembros — pipelines, packaging, despliegue y scripts (no realizan desarrollo de features funcionales).
   - QA: 4 miembros — pruebas, definición de casos y automatización (no realizan desarrollo de features funcionales).
+  
+Nota sobre persistencia y arquitectura cliente
+
+- Persistencia principal: Este proyecto usa Firebase Realtime Database como la persistencia de producción; todas las decisiones de diseño del repositorio y sincronización deben orientarse a RTDB.
+- Implementaciones en memoria (`InMemoryMainRepository`) se usan únicamente para pruebas y simulación local. NO deben sustituir a Firebase en entornos de producción.
+- Tipo de aplicación: cliente de escritorio JavaFX. `src/main/java/es/iesquevedo/Main.java` es el punto de entrada actual.
+- Frameworks: No se debe introducir Spring Boot en el cliente. Si se necesita un backend con credenciales privilegiadas, implementarlo como un servicio separado (por ejemplo Spring Boot) y mantenerlo en otro repositorio.
+
 - No incluir credenciales reales en el repositorio. Integraciones externas (Firebase) se efectuarán mediante stubs/mocks en CI salvo que se indique lo contrario.
 
 Lista de épicas

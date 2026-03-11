@@ -3,7 +3,12 @@
 Este documento explica la estructura de carpetas y paquetes que hemos creado bajo el paquete raíz `es.iesquevedo`, por qué existe cada paquete, qué ficheros placeholder se han añadido y recomendaciones de siguientes pasos.
 
 ## Objetivo
-Separar responsabilidades (entrada, negocio, persistencia, modelos, utilidades, configuración y excepciones) para facilitar mantenimiento, testing y futura integración con frameworks (p. ej. Spring Boot).
+- Separar responsabilidades (entrada, negocio, persistencia, modelos, utilidades, configuración y excepciones) para facilitar mantenimiento, testing y futura integración con frameworks (p. ej. Spring Boot).
+
+> Nota arquitectónica (importante):
+> - Tipo de aplicación: cliente de escritorio JavaFX con `Main` como punto de entrada. No es una aplicación servidor por defecto.
+> - Persistencia principal: Firebase Realtime Database es la base de datos prevista para producción. Las implementaciones en memoria (`inmemory`) existen únicamente para pruebas y desarrollo local; NO deben utilizarse en producción.
+> - Frameworks: No introducir Spring Boot en el cliente. Para DI en el cliente usar Weld (CDI) si se precisa inyección ligera. Spring Boot sólo es apropiado para backends separados (servicios o APIs).
 
 ## Resumen de paquetes y su propósito
 
@@ -24,6 +29,7 @@ Separar responsabilidades (entrada, negocio, persistencia, modelos, utilidades, 
   - Ficheros:
     - `MainRepository.java` — interfaz.
     - `inmemory/InMemoryMainRepository.java` — implementación en memoria para pruebas.
+    - `firebase/FirebaseMainRepository.java` — implementación orientada a Firebase Realtime DB (producción). (esqueleto/placeholder presente en el repo)
 
 - `es.iesquevedo.model`
   - Propósito: entidades o clases de dominio.
@@ -88,7 +94,10 @@ mvn -DskipTests=false test
 - src/test/java/es/iesquevedo/service/MainServiceTest.java
 
 ## Recomendaciones / siguientes pasos
-1. Decidir un framework (recomendado: Spring Boot). Si quieres, puedo adaptar la estructura para Spring Boot (añadir dependencias, anotar clases con `@RestController`, `@Service`, `@Repository`, crear `Application` con `main`).
+1. Frameworks y dirección técnica:
+   - No usar Spring Boot en el cliente JavaFX; si necesitas funcionalidades de backend, créalo como servicio separado (por ejemplo, con Spring Boot) y documenta claramente la separación de responsabilidades.
+   - Para inyección en el cliente, preferir Weld (CDI) como contenedor ligero; si añades dependencias actualiza `pom.xml` y documenta la justificación.
+   - Si quieres, puedo adaptar la estructura para un backend Spring Boot separado (añadir dependencias y ejemplos), pero no en el cliente.
 2. Añadir dependencias útiles al `pom.xml` según tus necesidades:
    - Spring Boot starters (web, test, data-jpa) si vas a exponer HTTP y usar persistencia.
    - Mockito / AssertJ para tests más avanzados.
@@ -105,4 +114,3 @@ Si quieres que adapte la estructura para Spring Boot ahora, confirmamelo y:
 ---
 
 Si prefieres que coloque este documento en otra ruta (por ejemplo `README.md` en la raíz) dímelo y lo muevo/duplico.
-

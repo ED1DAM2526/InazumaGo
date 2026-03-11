@@ -1,0 +1,83 @@
+@startuml
+' Diagrama de aplicación - InazumaGoPrevio
+skinparam componentStyle rectangle
+left to right direction
+
+actor "Interfaz de Usuario (Escritorio/CLI)" as UI
+
+package "Aplicación" {
+  [AppConfig] as AppConfig
+
+  package "Controllers" {
+    [HealthController] as HealthController
+    [MainController] as MainController
+  }
+
+  package "Servicio" {
+    [MainService] <<interface>> as MainService
+    [MainServiceImpl] as MainServiceImpl
+  }
+
+  package "Repositorio" {
+    [MainRepository] <<interface>> as MainRepository
+    [InMemoryMainRepository] as InMemoryMainRepository
+    [FirebaseMainRepository] as FirebaseMainRepository
+  }
+
+  package "Modelo / DTO / Mapper" {
+    [MainEntity] as MainEntity
+    [MainDto] as MainDto
+    [MainMapper] as MainMapper
+  }
+
+  package "Excepciones / Util" {
+    [ApiError] as ApiError
+    [NotFoundException] as NotFoundException
+    [DateUtils] as DateUtils
+  }
+
+  [Main] as Main
+}
+
+cloud "Firebase Realtime DB (persistencia principal)" as Firebase
+
+' Flujo principal
+UI -> Main : inicia/aprieta acciones
+Main -> MainController : inicia y maneja flujo
+UI -> HealthController : consulta estado (interno)
+
+MainController --> MainService : llama a métodos de negocio
+MainController --> MainMapper : mapear DTO <-> Entity
+MainServiceImpl ..|> MainService
+MainServiceImpl --> MainRepository : operaciones CRUD
+MainRepository <|-- InMemoryMainRepository
+MainRepository <|-- FirebaseMainRepository
+MainServiceImpl --> MainMapper : transforma datos
+MainServiceImpl --> ApiError : lanza errores API (en error)
+MainServiceImpl --> NotFoundException : lanza si no existe
+
+' Configuración e utilidades
+AppConfig ..> MainRepository : configura beans/repositorios
+DateUtils ..> MainServiceImpl : utilidades de fecha
+
+' Persistencia principal (en línea)
+FirebaseMainRepository --> Firebase : sincroniza/lee datos (producción)
+InMemoryMainRepository ..> Firebase : simulación/local (pruebas)
+
+' Notas visuales
+note right of MainController
+  Controladores coordinan la interacción entre la UI y la lógica de negocio.
+end note
+
+note right of MainServiceImpl
+  Lógica de negocio; valida y coordina repositorios y mappers.
+end note
+
+note right of InMemoryMainRepository
+  Implementación en memoria para pruebas/simulación; NO sustituye a Firebase en producción.
+end note
+
+note right of FirebaseMainRepository
+  Implementación de repositorio orientada a Firebase (REST/streaming). Persistencia principal.
+end note
+@enduml

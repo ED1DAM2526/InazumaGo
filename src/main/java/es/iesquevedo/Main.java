@@ -1,17 +1,35 @@
 package es.iesquevedo;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+import es.iesquevedo.config.AppConfig;
+import es.iesquevedo.controller.HealthController;
+import es.iesquevedo.controller.MainController;
+import es.iesquevedo.service.impl.MainServiceImpl;
+import es.iesquevedo.ui.HealthUIAdapter;
+import es.iesquevedo.ui.UIAdapter;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+import java.util.logging.Logger;
+
+public class Main {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+
+    public static void main(String[] args) {
+        // Configuración mínima: preferir URL de Firebase desde la variable de entorno FIREBASE_URL
+        String firebaseUrl = System.getenv("FIREBASE_URL");
+
+        // Crear repositorio (Firebase si FIREBASE_URL está definido, sino InMemory)
+        var repository = AppConfig.createMainRepository(firebaseUrl);
+
+        // Crear servicio y controlador
+        var service = new MainServiceImpl(repository);
+        var mainController = new MainController(service);
+
+        // Adaptadores UI
+        var ui = new UIAdapter(mainController);
+        var healthController = new HealthController();
+        var healthUi = new HealthUIAdapter(healthController);
+
+        // Uso simple: saludar y comprobar estado
+        LOGGER.info(ui.greet());
+        LOGGER.info("Health: " + healthUi.health());
     }
 }

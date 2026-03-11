@@ -1,0 +1,198 @@
+@startuml
+' Diagrama de clases — Modelo de dominio recomendado para InazumaGo
+' Enfoque: entidad-aggregate raíz (Game), value objects, DTOs para persistencia/transferencia
+skinparam classAttributeIconSize 0
+left to right direction
+
+package "Value Objects (es.iesquevedo.model.vo)" {
+  class GameId {
+    +String value  // UUID
+  }
+  class PlayerId {
+    +String value  // UUID or Firebase UID
+  }
+  class MoveId {
+    +String value  // UUID
+  }
+  class Timestamp {
+    +Instant value
+  }
+  class Version {
+    +long value  // optimistic concurrency (optional)
+  }
+}
+
+package "Domain (es.iesquevedo.model)" {
+  class AuditInfo {
+    +PlayerId createdBy
+    +Timestamp createdAt
+    +PlayerId updatedBy
+    +Timestamp updatedAt
+  }
+
+  class Player {
+    +PlayerId id
+    +String displayName
+    +String avatarUrl
+    +PlayerStatus status
+    +PlayerStats stats
+    +static Player create(PlayerId id, String displayName)
+  }
+
+  class PlayerStats {
+    +int wins
+    +int losses
+    +int draws
+  }
+
+  class GameSettings {
+    +int maxPlayers
+    +String variant
+    +Map<String,Object> options
+  }
+
+  class GameMeta {
+    +int turnNumber
+    +PlayerId currentPlayer
+    +GameSettings settings
+    +Map<String,Object> extra
+  }
+
+  class Move {
+    +MoveId id
+    +MovePayload payload
+    +PlayerId actor
+    +String clientNonce
+    +Timestamp clientTs
+    +MoveStatus status
+    +Optional<String> rejectReason
+    +Version version
+    +static Move create(MovePayload p, PlayerId actor, String nonce, Timestamp ts)
+  }
+
+  class MovePayload {
+    +String from
+    +String to
+    +String piece
+    +Map<String,Object> meta
+  }
+
+  class Snapshot {
+    +GameId gameId
+    +int sequence
+    +GameMeta meta
+    +List<Move> appliedMoves
+    +AuditInfo audit
+  }
+
+  class Game {
+    +GameId id
+    +List<Player> players
+    +GameMeta meta
+    +List<Move> moves  // append-only
+    +Snapshot latestSnapshot
+    +Version version
+    +void addPlayer(Player p)
+    +void applyMove(Move m)  // validates turn, updates meta and moves
+    +void rollbackMove(MoveId id)
+    +GameState state
+  }
+}
+
+package "Enums (es.iesquevedo.model.enums)" {
+  enum PlayerStatus {
+    OFFLINE
+    ONLINE
+    IN_GAME
+  }
+  enum MoveStatus {
+    PENDING
+    CONFIRMED
+    REJECTED
+  }
+  enum GameState {
+    WAITING
+    ONGOING
+    FINISHED
+  }
+}
+
+package "DTOs (es.iesquevedo.dto)" {
+  class GameDto {
+    +String gameId
+    +List<PlayerDto> players
+    +GameMetaDto meta
+    +List<MoveDto> moves
+    +long version
+  }
+  class PlayerDto {
+    +String id
+    +String displayName
+    +String avatarUrl
+  }
+  class MoveDto {
+    +String id
+    +String actorId
+    +String clientNonce
+    +long clientTs
+    +MovePayloadDto payload
+    +String status
+    +long version
+  }
+  class MovePayloadDto {
+    +String from
+    +String to
+    +String piece
+    +Map<String,Object> meta
+  }
+  class GameMetaDto {
+    +int turnNumber
+    +String currentPlayerId
+    +Map<String,Object> options
+  }
+}
+
+package "Mapper / Conversion (es.iesquevedo.dto.mapper)" {
+  class GameMapper {
+    +static GameDto toDto(Game g)
+    +static Game toEntity(GameDto d)
+  }
+  class PlayerMapper {
+    +static PlayerDto toDto(Player p)
+    +static Player toEntity(PlayerDto d)
+  }
+  class MoveMapper {
+    +static MoveDto toDto(Move m)
+    +static Move toEntity(MoveDto d)
+  }
+}
+
+' Relaciones
+Game "1" o-- "*" Player : contains
+Game "1" o-- "*" Move : append-only
+Game "1" -- "1" GameMeta : meta
+Game "1" -- "1" Snapshot : latestSnapshot
+Move "1" --> "1" MovePayload : payload
+Move "1" --> "1" Player : actor (by id)
+Player "1" o-- "1" PlayerStats : stats
+
+' Mappers depend on domain/DTOs
+GameMapper ..> Game
+GameMapper ..> GameDto
+PlayerMapper ..> Player
+PlayerMapper ..> PlayerDto
+MoveMapper ..> Move
+MoveMapper ..> MoveDto
+
+' Design notes
+note bottom
+  Recomendaciones de implementación:
+  - Usar Ids como String (UUID o Firebase UID). Value objects ayudan a evitar mezclar tipos.
+  - Marcar objetos inmutables donde tenga sentido (Move, MovePayload, Snapshot). Entidades agregadas (Game) gestionan invariants.
+  - Mantener lista de moves append-only; usar snapshots para optimizar lectura y reconciliación.
+  - Incluir `version` para optimistic concurrency (RTDB no tiene version nativo, usar e.g. etag or custom seq).
+  - Serialización a JSON en DTOs; usar `Instant` en dominio, mapear a ISO-8601 strings en DTOs.
+  - Client-side: usar `clientNonce` y `clientTs` para dedupe y ordering. Server/backends deben validar y aplicar reglas.
+end note
+
+@enduml

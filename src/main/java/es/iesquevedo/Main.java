@@ -6,7 +6,9 @@ import es.iesquevedo.controller.MainController;
 import es.iesquevedo.service.impl.MainServiceImpl;
 import es.iesquevedo.ui.HealthUIAdapter;
 import es.iesquevedo.ui.UIAdapter;
+import es.iesquevedo.util.DateUtils;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Main {
@@ -29,7 +31,10 @@ public class Main {
         var healthUi = new HealthUIAdapter(healthController);
 
         // Uso simple: saludar y comprobar estado
-        LOGGER.info(ui.greet());
-        LOGGER.info("Health: " + healthUi.health());
+        // Comprobar explícitamente si el nivel está habilitado y usar el formateo incorporado
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.log(Level.INFO, "{0} {1}", new Object[]{DateUtils.nowIso(), ui.greet()});
+            LOGGER.log(Level.INFO, "{0} Health: {1}", new Object[]{DateUtils.nowIso(), healthUi.health()});
+        }
     }
 }

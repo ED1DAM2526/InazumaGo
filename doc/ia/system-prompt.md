@@ -70,12 +70,23 @@ Configuración local (user-prompt.md)
 
 - Importante: `doc/ia/user-prompt.md` está pensado para uso local y no debe versionarse (añádelo al `.gitignore`).
 
+Además, `doc/ia/user-prompt.md` puede incluir una entrada opcional para `MAVEN_HOME` cuando el desarrollador quiera usar una instalación específica de Maven (por ejemplo la que incluye IntelliJ). Ejemplo PowerShell:
+
+  $env:MAVEN_HOME = 'C:\Program Files\JetBrains\IntelliJ IDEA 2025.2.2\plugins\maven\lib\maven3'
+  $env:Path = "$env:MAVEN_HOME\\bin;$env:Path"
+
+- Añadir `MAVEN_HOME` ayuda a que asistentes/CoPilot y scripts utilicen la misma instalación de Maven que el desarrollador.
+
 Ejecución forzada con el JDK del usuario y confirmación
 - Preferencia de JDK: Antes de compilar o ejecutar código, el asistente debe preferir usar la instalación de Java indicada por el desarrollador en `doc/ia/user-prompt.md` (variable `JAVA_HOME`) o por un parámetro explícito proporcionado por el usuario.
 - Comprobación previa obligatoria: Siempre que vaya a ejecutar código (compilar, tests o ejecutar clases), el asistente debe:
   1. Buscar en `doc/ia/user-prompt.md` una línea con la asignación de `JAVA_HOME` (p. ej. `$env:JAVA_HOME = 'C:\ruta\a\tu\jdk'`).
   2. Si encuentra una ruta, verificar que exista en disco y que contenga `bin\java.exe`.
   3. Si existe, aplicar temporalmente esa ruta a la sesión (exportando `JAVA_HOME` y asegurándose de que `JAVA_HOME\bin` esté presente en `PATH` UNA SOLA VEZ — no anteponer duplicadas).
+  4. Buscar en `doc/ia/user-prompt.md` una entrada para `MAVEN_HOME` (p. ej. `$env:MAVEN_HOME = 'C:\ruta\a\tu\maven'`).
+  5. Si encuentra `MAVEN_HOME`, verificar que la ruta exista y que contenga `bin\mvn.cmd` o un ejecutable `mvn` en `bin`.
+  6. Si existe y es válida, aplicar temporalmente `MAVEN_HOME` y asegurarse de que `MAVEN_HOME\bin` esté presente en `PATH` (sin duplicados).
+
 - Si la ruta NO existe o `doc/ia/user-prompt.md` no contiene una entrada válida:
   - El asistente debe pedir confirmación al usuario (pregunta breve y explícita) antes de crear o modificar `doc/ia/user-prompt.md` o antes de aplicar cualquier cambio al entorno de ejecución.
   - El mensaje de confirmación debe incluir: la ruta que falta (o indicar que no hay ruta), la acción propuesta (añadir/editar `doc/ia/user-prompt.md` y/o ejecutar `scripts/use-user-jdk.ps1`), y el efecto (temporal: solo afecta a la sesión actual del script/terminal).
@@ -83,6 +94,7 @@ Ejecución forzada con el JDK del usuario y confirmación
     - Pedir la ruta concreta al JDK y validar que `bin\java.exe` exista, y
     - Añadir la entrada a `doc/ia/user-prompt.md` si no está presente (añadir únicamente una vez; no crear duplicados en el archivo), y
     - Aplicar temporalmente `JAVA_HOME` y ajustar `PATH` (asegurándose de no duplicar `JAVA_HOME\bin`).
+    - Además, preguntar si el usuario quiere añadir/confirmar `MAVEN_HOME` y validar que `bin\\mvn.cmd` o `bin/mvn` exista; si confirma, añadir la entrada a `doc/ia/user-prompt.md` y aplicar `MAVEN_HOME` temporalmente.
   - Si el usuario no confirma, el asistente debe abortar la ejecución o preguntar si usar el JDK del sistema en su lugar.
   - Registro/justificación: siempre documentar en la nota de la tarea o en el mensaje de commit la ruta usada y la confirmación del usuario. Ejemplo de texto a añadir en el commit/note: "Ejecución con JDK local: C:\Users\... (confirmado por usuario)".
 

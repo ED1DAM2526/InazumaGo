@@ -42,11 +42,11 @@ powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -RunMaven
 # Aplicar la ruta, compilar y ejecutar Main
 powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -RunMaven -RunMain
 
-Nota: el script busca en `doc/ia/user-prompt.md` una línea del tipo:
+powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -JdkPath 'C:\Program Files\Java\jdk-17' -RunMaven -RunMain
 
-$env:JAVA_HOME = 'C:\ruta\a\tu\jdk'
+## Configuración de rutas (JDK y Maven Wrapper)
 
-Si no la encuentra puedes pasar la ruta explícitamente:
+### ⚠️ IMPORTANTE: JDK versión 21 REQUERIDA
 
 powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -JdkPath 'C:\Program Files\Java\jdk-17' -RunMaven -RunMain
 

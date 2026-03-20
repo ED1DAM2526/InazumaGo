@@ -32,68 +32,47 @@ param(
 # Configuración
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $projectRoot = Split-Path -Parent $scriptDir
-$jdkPath = $null
 
 Write-Host "===============================================" -ForegroundColor Cyan
-Write-Host "Ejecutando tests de InazumaGo" -ForegroundColor Cyan
+Write-Host "Ejecutando tests de InazumaGo (usando Maven Wrapper)" -ForegroundColor Cyan
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Buscar JDK si JAVA_HOME no está configurado
-if (-not $env:JAVA_HOME) {
-    Write-Host "[*] Buscando JDK..." -ForegroundColor Yellow
-
-    # Búsqueda 1: Directorios estándar de Microsoft/Oracle/OpenJDK
-    $jdkPaths = @(
-        "C:\Users\$env:USERNAME\.jdks",
-        "C:\Program Files\Java",
-        "C:\Program Files (x86)\Java",
-        "$env:ProgramFiles\Java",
-        "$env:ProgramFiles(x86)\Java"
-    )
-
-    foreach ($basePath in $jdkPaths) {
-        if (Test-Path $basePath) {
-            $jdks = Get-ChildItem -Path $basePath -Directory -Filter "jdk*" -ErrorAction SilentlyContinue |
-                    Sort-Object -Property Name -Descending
-            if ($jdks) {
-                $jdkPath = $jdks[0].FullName
-                break
-            }
-
-            # También buscar OpenJDK con prefijo ms-
-            $msJdks = Get-ChildItem -Path $basePath -Directory -Filter "ms-*" -ErrorAction SilentlyContinue |
-                      Sort-Object -Property Name -Descending
-            if ($msJdks) {
-                $jdkPath = $msJdks[0].FullName
-                break
-            }
-        }
+# Intentar aplicar JDK desde doc/ia/user-prompt.md en modo no interactivo.
+# El script use-user-jdk.ps1 fallará con código distinto de 0 si no hay JDK_PATH válida.
+$useJdkScript = Join-Path $scriptDir 'use-user-jdk.ps1'
+if (Test-Path $useJdkScript) {
+    Write-Host "[*] Aplicando JDK desde doc/ia/user-prompt.md (si existe)..." -ForegroundColor Yellow
+    powershell -ExecutionPolicy Bypass -File $useJdkScript -NonInteractive
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: no se pudo aplicar el JDK desde doc/ia/user-prompt.md (código $LASTEXITCODE). Este script requiere que JDK esté configurado en ese archivo. Abortando." -ForegroundColor Red
+        # Si el script hijo ya mostró un mensaje de error específico, no lo sobrescribimos; aquí reiteramos el mensaje conforme a la política estricta.
+        Write-Host 'ERROR: `JDK_PATH` no encontrado en `doc/ia/user-prompt.md`. Configure la ruta al JDK 21 en ese archivo y vuelva a intentarlo.' -ForegroundColor Red
+        exit $LASTEXITCODE
     }
-
-    if ($jdkPath -and (Test-Path "$jdkPath\bin\java.exe")) {
-        Write-Host "JDK encontrado: $jdkPath" -ForegroundColor Green
-        $env:JAVA_HOME = $jdkPath
-        $env:Path = "$jdkPath\bin;$env:Path"
-    }
-    else {
-        Write-Host "JDK no encontrado. Continúo sin configuración..." -ForegroundColor Yellow
-    }
+} else {
+    Write-Host "ERROR: no se encontró scripts/use-user-jdk.ps1. Este script requiere que exista y aplique el JDK desde doc/ia/user-prompt.md. Abortando." -ForegroundColor Red
+    exit 5
 }
 
 # Cambiar al directorio del proyecto
 Push-Location $projectRoot
 
 try {
-    Write-Host "[*] Ejecutando tests..." -ForegroundColor Yellow
+    Write-Host "[*] Ejecutando tests con Maven Wrapper (mvnw.cmd)..." -ForegroundColor Yellow
     Write-Host ""
 
-    # Ejecutar tests con Maven Wrapper
+    $mvnw = Join-Path $projectRoot 'mvnw.cmd'
+    if (-not (Test-Path $mvnw)) {
+        Write-Host "ERROR: No se encontró mvnw.cmd en la raíz del proyecto. Asegúrate de que el Maven Wrapper está presente." -ForegroundColor Red
+        exit 4
+    }
+
     if ($Verbose) {
-        & cmd /c "mvnw.cmd -X -DskipTests=false test"
+        & cmd /c "`"$mvnw`" -X -DskipTests=false test"
     }
     else {
-        & cmd /c "mvnw.cmd -DskipTests=false test"
+        & cmd /c "`"$mvnw`" -DskipTests=false test"
     }
 
     $exitCode = $LASTEXITCODE
@@ -120,11 +99,3 @@ try {
 finally {
     Pop-Location
 }
-
-
-
-
-
-
-
-

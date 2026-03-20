@@ -1,8 +1,16 @@
 # Ignorar archivos de configuración local
 /doc/ia/user-prompt.md
 
+# Ignorar documentación de desarrollo local
+CONFIGURACION_RUTAS.md
+PROYECTO_COMPLETADO.md
+
+# Ignorar Maven wrapper
+.mvn/
+mvnw
+mvnw.cmd
+
 target/
-!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 .kotlin

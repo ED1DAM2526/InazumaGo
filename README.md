@@ -49,3 +49,36 @@ $env:JAVA_HOME = 'C:\ruta\a\tu\jdk'
 Si no la encuentra puedes pasar la ruta explícitamente:
 
 powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -JdkPath 'C:\Program Files\Java\jdk-17' -RunMaven -RunMain
+
+---
+
+## ⚡ Inicio Rápido: Ejecutar Tests
+
+**⭐ Usa GitHub Copilot:** Abre el archivo `doc/ia/copilot-run-tests.md` y pasa su contenido a Copilot para obtener ayuda interactiva paso a paso.
+
+1. Verifica Java (debe ser 21):
+```powershell
+java -version
+```
+
+2. Ejecuta tests:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run-tests.ps1
+```
+
+3. Si no detecta Maven de IntelliJ, pásalo explícito:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run-tests.ps1 -MavenCmdPath 'C:\Program Files\JetBrains\IntelliJ IDEA 2025.1.4\plugins\maven\lib\maven3\bin\mvn.cmd'
+```
+
+4. Resultado esperado:
+- `BUILD SUCCESS` o `BUILD FAILURE`
+- Reportes en `target/surefire-reports/`
+
+### 🔧 Troubleshooting
+
+| Problema | Solución |
+|----------|----------|
+| "No compiler is provided" | Verifica `java -version`. Debe ser 21, no otra versión |
+| Script no encuentra JDK | Coloca JDK 21 en `C:\Users\[usuario]\.jdks\jdk-21\` o usa `-JdkPath` |
+| Tengo JDK 17/20/22 instalado | Descarga JDK 21 en `.jdks/jdk-21/`. El script lo encontrará automáticamente |

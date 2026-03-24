@@ -23,6 +23,23 @@ mvn -q -DskipTests=false test
 mvn -q -DskipTests=false package
 ```
 
+## Instrucciones de ejecución JavaFX en README (PowerShell)
+
+Para ejecutar la aplicación:
+
+```powershell
+# Opción 1: Con script que aplica JDK (recomendado)
+powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -NonInteractive; mvn exec:java -Dexec.mainClass="es.iesquevedo.Main"
+
+# Opción 2: Con Maven Wrapper
+mvn exec:java -Dexec.mainClass="es.iesquevedo.Main"
+
+# Opción 3: Con Maven global
+mvn exec:java -Dexec.mainClass="es.iesquevedo.Main"
+```
+
+**Resultado esperado:** Saludo de bienvenida y estado del sistema (Health check).
+
 Notas
 - Si necesitas poner temporalmente una ruta al JDK en la sesión, consulta `doc/ia/user-prompt.md`.
 - IntelliJ IDEA suele usar su distribución integrada de Maven por defecto; revisa la configuración en Settings > Build, Execution, Deployment > Build Tools > Maven.

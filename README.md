@@ -3,7 +3,7 @@ Este repositorio contiene el proyecto InazumaGo (Java + Maven).
 
 - Para desarrollo local con PowerShell, configura `JDK_PATH` en `doc/ia/user-prompt.md` y aplica la ruta con `scripts/use-user-jdk.ps1`.
 
-Cómo compilar y probar (Windows PowerShell)
+## Cómo compilar y probar (Windows PowerShell)
 
 ```powershell
 # Aplica el JDK definido en doc/ia/user-prompt.md (no persistente)
@@ -15,6 +15,23 @@ powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -NonInteract
 # O usa el script recomendado que aplica JDK y ejecuta tests
 powershell -ExecutionPolicy Bypass -File .\scripts\run-tests.ps1
 ```
+
+## Instrucciones de ejecución JavaFX en README (PowerShell)
+
+Una vez que hayas configurado el JDK versión 21 según las instrucciones de abajo, puedes ejecutar la aplicación con:
+
+```powershell
+# Opción 1: Usar directamente el script que aplica el JDK (recomendado)
+powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -NonInteractive; .\mvnw.cmd clean compile exec:java -Dexec.mainClass="es.iesquevedo.Main"
+
+# Opción 2: Si tienes Maven instalado globalmente (requiere JDK 21 en PATH)
+mvn clean compile exec:java -Dexec.mainClass="es.iesquevedo.Main"
+
+# Opción 3: Compilar y ejecutar usando Maven Wrapper
+.\mvnw.cmd clean compile exec:java -Dexec.mainClass="es.iesquevedo.Main"
+```
+
+**Resultado esperado:** La aplicación mostrará en consola un saludo de bienvenida y el estado del sistema (Health check).
 
 ### Importante: usar siempre el Maven Wrapper
 

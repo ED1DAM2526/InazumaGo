@@ -1,27 +1,24 @@
 # Inazuma Go
 Este repositorio contiene el proyecto InazumaGo (Java + Maven).
 
-- Para desarrollo local con PowerShell, puedes usar `doc/ia/user-prompt.md` para poner la ruta al JDK en la sesión.
-- Para tareas automáticas y cambios significativos, lee `doc/ia/system-prompt.md` primero.
-Notas rápidas:
+- Para desarrollo local con PowerShell, configura `JDK_PATH` en `doc/ia/user-prompt.md` y aplica la ruta con `scripts/use-user-jdk.ps1`.
 
-- `doc/ia/user-prompt.md` — Archivo local para configurar temporalmente variables de entorno (por ejemplo, la ruta al JDK) en la sesión; está pensado para uso personal y no debe subirse al repositorio.
-- `doc/ia/system-prompt.md` — Prompt de sistema que deben leer los asistentes/IA al trabajar en este repositorio.
-Documentación importante:
-
-- `doc/normas-trabajo-proyecto.md` — Normas de trabajo del proyecto: flujo de ramas, PR, revisiones, merges, incidencias, hotfix y criterios de cierre.
-
-Cómo compilar y probar
-
-En PowerShell (Windows):
+Cómo compilar y probar (Windows PowerShell)
 
 ```powershell
-# Ejecuta tests (usa el JDK activo en la sesión o configura la ruta con doc/ia/user-prompt.md)
-mvn -q -DskipTests=false test
+# Aplica el JDK definido en doc/ia/user-prompt.md (no persistente)
+powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -NonInteractive
 
-# Empaqueta el proyecto
-mvn -q -DskipTests=false package
+# Ejecuta tests usando el Maven Wrapper incluido en el proyecto
+.\mvnw.cmd -DskipTests=false test
+
+# O usa el script recomendado que aplica JDK y ejecuta tests
+powershell -ExecutionPolicy Bypass -File .\scripts\run-tests.ps1
 ```
+
+### Importante: usar siempre el Maven Wrapper
+
+Este proyecto incluye el Maven Wrapper (`mvnw` / `mvnw.cmd`). Usar siempre el wrapper evita depender de la instalación de Maven que trae IntelliJ u otra instalación local. En IntelliJ puedes configurar el proyecto para usar el Maven Wrapper (Settings > Build, Execution, Deployment > Build Tools > Maven → Use Maven wrapper).
 
 Notas
 - Si necesitas poner temporalmente una ruta al JDK en la sesión, consulta `doc/ia/user-prompt.md`.
@@ -57,11 +54,13 @@ Razones:
 
 ### ¿Dónde encontrar mi JDK versión 21?
 
-El script `run-tests.ps1` busca automáticamente el JDK versión 21 en estas ubicaciones (en orden):
+El proyecto requiere que la ruta al JDK (clave `JDK_PATH`) esté configurada en `doc/ia/user-prompt.md`. Los scripts del repositorio (por ejemplo `scripts\use-user-jdk.ps1` y `scripts\run-tests.ps1`) leerán esa clave y aplicarán la ruta a la sesión antes de ejecutar Maven.
 
-1. **`C:\Users\[tu-usuario]\.jdks\`** (recomendado para desarrollo local)
-2. **`C:\Program Files\Java\`** (instalación estándar de Oracle/OpenJDK)
-3. **`C:\Program Files (x86)\Java\`** (instalación 32-bit)
+IMPORTANTE: Si `JDK_PATH` no existe o está vacía, los scripts en modo non-interactive ABORTARÁN y mostrarán un mensaje de error claro similar a:
+
+    ERROR: `JDK_PATH` no encontrado en `doc/ia/user-prompt.md`. Configure la ruta al JDK 21 en ese archivo y vuelva a intentarlo.
+
+No se realizará búsqueda automática de JDK en ubicaciones del sistema para ejecuciones non-interactive; la forma soportada de configuración local es mediante `doc/ia/user-prompt.md`.
 
 #### Ejemplos de rutas VÁLIDAS (versión 21):
 
@@ -234,68 +233,3 @@ Move-Item "C:\Tu-Ruta\jdk-21" "C:\Users\$env:USERNAME\.jdks\jdk-21"
 # Luego ejecuta:
 .\scripts\run-tests.ps1
 ```
-
-## Ejecutar Tests
-
-Se proporciona un script PowerShell `scripts/run-tests.ps1` para ejecutar los tests del proyecto de forma automatizada.
-
-### Opción 1: Script PowerShell (Recomendado para automatización)
-
-La forma más sencilla es usar el script PowerShell que busca automáticamente el JDK:
-
-```powershell
-# Desde la raíz del proyecto
-.\scripts\run-tests.ps1
-
-# Con verbosidad (para depuración)
-.\scripts\run-tests.ps1 -Verbose
-```
-
-**¿Qué hace el script?**
-- Busca automáticamente JDK versión 21
-- Ejecuta los tests usando Maven Wrapper
-- Muestra el resultado final (exitoso o fallido)
-- Genera reportes en `target/surefire-reports/`
-
-### Opción 2: Desde IntelliJ IDEA (Más intuitivo)
-
-La forma visual más sencilla:
-
-1. Abre el proyecto en IntelliJ IDEA
-2. Navega a `src/test/java/es/iesquevedo/`
-3. Haz clic derecho en una clase de test (ej: `MainTest.java`)
-4. Selecciona **"Run 'MainTest'"** o **"Run Tests in MainTest"**
-5. O usa el atajo: **Ctrl+Shift+F10**
-
-Para ejecutar todos los tests:
-- Haz clic derecho en la carpeta `src/test/java`
-- Selecciona **"Run Tests in 'java'"**
-
-### Opción 3: Maven desde PowerShell (Si Maven está en PATH)
-
-Si tienes Maven instalado y configurado:
-
-```powershell
-mvn -DskipTests=false test
-```
-
-### Resultado de los tests
-
-Después de ejecutar los tests verás:
-
-- **BUILD SUCCESS** → todos los tests pasaron ✓
-- **BUILD FAILURE** → algunos tests fallaron ✗
-
-**Ejemplo de ejecución exitosa:**
-
-```
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
-
-[INFO] BUILD SUCCESS
-[INFO] Total time: 19.429 s
-```
-
-**Reportes detallados:**
-- Ubicación: `target/surefire-reports/`
-- Formatos: XML y archivos de texto
-- Nombres: `TEST-*.xml`, `TEST-*.txt`

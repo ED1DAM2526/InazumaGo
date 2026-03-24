@@ -21,17 +21,17 @@ powershell -ExecutionPolicy Bypass -File .\scripts\run-tests.ps1
 Una vez que hayas configurado el JDK versión 21 según las instrucciones de abajo, puedes ejecutar la aplicación con:
 
 ```powershell
-# Opción 1: Usar directamente el script que aplica el JDK (recomendado)
+# Opción 1: Script que aplica JDK automáticamente (recomendado)
 powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -NonInteractive; .\mvnw.cmd clean compile exec:java -Dexec.mainClass="es.iesquevedo.Main"
 
-# Opción 2: Si tienes Maven instalado globalmente (requiere JDK 21 en PATH)
-mvn clean compile exec:java -Dexec.mainClass="es.iesquevedo.Main"
-
-# Opción 3: Compilar y ejecutar usando Maven Wrapper
+# Opción 2: Maven Wrapper (requiere JDK 21 configurado)
 .\mvnw.cmd clean compile exec:java -Dexec.mainClass="es.iesquevedo.Main"
+
+# Opción 3: Maven global (requiere JDK 21 en PATH)
+mvn clean compile exec:java -Dexec.mainClass="es.iesquevedo.Main"
 ```
 
-**Resultado esperado:** La aplicación mostrará en consola un saludo de bienvenida y el estado del sistema (Health check).
+**Resultado esperado:** La aplicación mostrará un saludo de bienvenida y el estado del sistema (Health check).
 
 ### Importante: usar siempre el Maven Wrapper
 

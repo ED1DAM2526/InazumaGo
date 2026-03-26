@@ -63,38 +63,70 @@ Uso
 
 Configuración local (user-prompt.md)
 - Para facilitar la configuración local, la ruta al JDK y otras variables de sesión deben colocarse en `doc/ia/user-prompt.md`.
-- `doc/ia/user-prompt.md` contiene instrucciones (PowerShell) para añadir temporalmente la ruta del JDK al PATH de la sesión: por ejemplo:
+- Este proyecto seguirá una regla simple: los scripts y agentes deben leer la clave `JDK_PATH` de `doc/ia/user-prompt.md` y aplicar esa ruta como `JAVA_HOME` para la sesión. No se realizarán búsquedas automáticas extensas.
 
-  $env:JAVA_HOME = 'C:\Program Files\Java\jdk-17.0.8'
-  $env:Path = "$env:JAVA_HOME\bin;$env:Path"
+- Ejemplo (PowerShell):
+
+  JDK_PATH = 'C:\Program Files\Java\jdk-21'
 
 - Importante: `doc/ia/user-prompt.md` está pensado para uso local y no debe versionarse (añádelo al `.gitignore`).
 
-Ejecución forzada con el JDK del usuario y confirmación
-- Preferencia de JDK: Antes de compilar o ejecutar código, el asistente debe preferir usar la instalación de Java indicada por el desarrollador en `doc/ia/user-prompt.md` (variable `JAVA_HOME`) o por un parámetro explícito proporcionado por el usuario.
-- Comprobación previa obligatoria: Siempre que vaya a ejecutar código (compilar, tests o ejecutar clases), el asistente debe:
-  1. Buscar en `doc/ia/user-prompt.md` una línea con la asignación de `JAVA_HOME` (p. ej. `$env:JAVA_HOME = 'C:\ruta\a\tu\jdk'`).
-  2. Si encuentra una ruta, verificar que exista en disco y que contenga `bin\java.exe`.
-  3. Si existe, aplicar temporalmente esa ruta a la sesión (exportando `JAVA_HOME` y asegurándose de que `JAVA_HOME\bin` esté presente en `PATH` UNA SOLA VEZ — no anteponer duplicadas).
-- Si la ruta NO existe o `doc/ia/user-prompt.md` no contiene una entrada válida:
-  - El asistente debe pedir confirmación al usuario (pregunta breve y explícita) antes de crear o modificar `doc/ia/user-prompt.md` o antes de aplicar cualquier cambio al entorno de ejecución.
-  - El mensaje de confirmación debe incluir: la ruta que falta (o indicar que no hay ruta), la acción propuesta (añadir/editar `doc/ia/user-prompt.md` y/o ejecutar `scripts/use-user-jdk.ps1`), y el efecto (temporal: solo afecta a la sesión actual del script/terminal).
-  - Si el usuario confirma, el asistente puede:
-    - Pedir la ruta concreta al JDK y validar que `bin\java.exe` exista, y
-    - Añadir la entrada a `doc/ia/user-prompt.md` si no está presente (añadir únicamente una vez; no crear duplicados en el archivo), y
-    - Aplicar temporalmente `JAVA_HOME` y ajustar `PATH` (asegurándose de no duplicar `JAVA_HOME\bin`).
-  - Si el usuario no confirma, el asistente debe abortar la ejecución o preguntar si usar el JDK del sistema en su lugar.
-  - Registro/justificación: siempre documentar en la nota de la tarea o en el mensaje de commit la ruta usada y la confirmación del usuario. Ejemplo de texto a añadir en el commit/note: "Ejecución con JDK local: C:\Users\... (confirmado por usuario)".
+Maven Wrapper
+- Este proyecto incluye el Maven Wrapper (`mvnw` / `mvnw.cmd`). Todas las ejecuciones automáticas y scripts del repositorio deben utilizar el wrapper en lugar de depender de una instalación de Maven en PATH o de la instalación integrada de IntelliJ.
 
-Plantilla de confirmación (usar este texto cuando pidas permiso al usuario):
-"No se encuentra la ruta al JDK en `doc/ia/user-prompt.md`. Se propone crear/actualizar la entrada con la ruta: <RUTA_PROPOSITA>. Esto implicará añadir temporalmente `JAVA_HOME` y `JAVA_HOME\\bin` al PATH en la sesión actual y añadir la línea a `doc/ia/user-prompt.md` (archivo local y no versionado). ¿Confirmas? (S/N)"
+- Uso en Windows (ejemplo):
 
-Implementación en scripts y automatizaciones
-- Los scripts del repositorio (por ejemplo `scripts/use-user-jdk.ps1`) deben implementar esta lógica: buscar `doc/ia/user-prompt.md`, validar la ruta, evitar duplicados en `PATH` y en el propio `user-prompt.md`, y pedir confirmación al usuario antes de crear/editar el archivo.
-- Las herramientas automáticas o agentes deben respetar este flujo y no modificar `user-prompt.md` sin confirmación del usuario.
+  .\mvnw.cmd -DskipTests=false test
 
-IntelliJ y Maven
-- Nota: IntelliJ IDEA incluye una distribución de Maven que puede usar por defecto (o puedes configurar una instalación externa en Settings > Build, Execution, Deployment > Build Tools > Maven > "Maven home directory").
+- En IntelliJ: configura el proyecto para usar el Maven Wrapper (Settings > Build, Execution, Deployment > Build Tools > Maven -> Use Maven wrapper). Con esto, el IDE usará la versión de Maven definida por el wrapper y ya no dependerás de la ruta Maven integrada de cada usuario.
+
+Ejecución forzada con el JDK del usuario (simplificado)
+- Flujo recomendado por scripts y agentes:
+  1. Leer `JDK_PATH` en `doc/ia/user-prompt.md`.
+  2. Si existe, aplicar temporalmente `JAVA_HOME` y prefijar `JAVA_HOME\bin` en `PATH` (sin duplicados) para la sesión.
+  3. No realizar comprobaciones de versión adicionales: se confía en que el usuario ha puesto la ruta correcta (la responsabilidad del desarrollador).
+  4. Si no existe `JDK_PATH`, los scripts en modo non-interactive deben ABORTAR INMEDIATAMENTE y mostrar el siguiente mensaje de error exacto:
+
+     ERROR: `JDK_PATH` no encontrado en `doc/ia/user-prompt.md`. Configure la ruta al JDK 21 en ese archivo y vuelva a intentarlo.
+
+     No se realizará búsqueda automática ni fallback a otras ubicaciones cuando se ejecute en modo non-interactive.
+
+- Nota: para ejecuciones automatizadas en CI se recomienda garantizar que el runner tenga JDK 21 disponible; el wrapper sólo cubre la versión de Maven, no la versión del JDK.
+
+# Documentos técnicos obligatorios
+- `doc/firebase-realtime-plan.md`: plan técnico objetivo y obligatorio para cualquier cambio relacionado con la sincronización en tiempo real, persistencia en Firebase RTDB, reglas de seguridad y diseño de eventos. Los agentes deben leer este documento antes de implementar cambios que afecten a la capa de persistencia/transport.
+
+Configuración local (user-prompt.md)
+- Para facilitar la configuración local, la ruta al JDK y otras variables de sesión deben colocarse en `doc/ia/user-prompt.md`.
+- Este proyecto seguirá una regla simple: los scripts y agentes deben leer la clave `JDK_PATH` de `doc/ia/user-prompt.md` y aplicar esa ruta como `JAVA_HOME` para la sesión. No se realizarán búsquedas automáticas extensas.
+
+- Ejemplo (PowerShell):
+
+  JDK_PATH = 'C:\Program Files\Java\jdk-21'
+
+- Importante: `doc/ia/user-prompt.md` está pensado para uso local y no debe versionarse (añádelo al `.gitignore`).
+
+Maven Wrapper
+- Este proyecto incluye el Maven Wrapper (`mvnw` / `mvnw.cmd`). Todas las ejecuciones automáticas y scripts del repositorio deben utilizar el wrapper en lugar de depender de una instalación de Maven en PATH o de la instalación integrada de IntelliJ.
+
+- Uso en Windows (ejemplo):
+
+  .\mvnw.cmd -DskipTests=false test
+
+- En IntelliJ: configura el proyecto para usar el Maven Wrapper (Settings > Build, Execution, Deployment > Build Tools > Maven -> Use Maven wrapper). Con esto, el IDE usará la versión de Maven definida por el wrapper y ya no dependerás de la ruta Maven integrada de cada usuario.
+
+Ejecución forzada con el JDK del usuario (simplificado)
+- Flujo recomendado por scripts y agentes:
+  1. Leer `JDK_PATH` en `doc/ia/user-prompt.md`.
+  2. Si existe, aplicar temporalmente `JAVA_HOME` y prefijar `JAVA_HOME\bin` en `PATH` (sin duplicados) para la sesión.
+  3. No realizar comprobaciones de versión adicionales: se confía en que el usuario ha puesto la ruta correcta (la responsabilidad del desarrollador).
+  4. Si no existe `JDK_PATH`, los scripts en modo non-interactive deben ABORTAR INMEDIATAMENTE y mostrar el siguiente mensaje de error exacto:
+
+     ERROR: `JDK_PATH` no encontrado en `doc/ia/user-prompt.md`. Configure la ruta al JDK 21 en ese archivo y vuelva a intentarlo.
+
+     No se realizará búsqueda automática ni fallback a otras ubicaciones cuando se ejecute en modo non-interactive.
+
+- Nota: para ejecuciones automatizadas en CI se recomienda garantizar que el runner tenga JDK 21 disponible; el wrapper sólo cubre la versión de Maven, no la versión del JDK.
 
 ## Decisiones y directrices específicas del proyecto (resumen para agentes)
 

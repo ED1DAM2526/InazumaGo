@@ -31,11 +31,30 @@ powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -NonInteract
 mvn clean compile exec:java -Dexec.mainClass="es.iesquevedo.Main"
 ```
 
+ejecuJavaFX
+## Instrucciones de ejecución JavaFX en README (PowerShell)
+
+Para ejecutar la aplicación:
+
+```powershell
+# Opción 1: Con script que aplica JDK (recomendado)
+powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -NonInteractive; mvn exec:java -Dexec.mainClass="es.iesquevedo.Main"
+
+# Opción 2: Con Maven Wrapper
+mvn exec:java -Dexec.mainClass="es.iesquevedo.Main"
+
+# Opción 3: Con Maven global
+mvn exec:java -Dexec.mainClass="es.iesquevedo.Main"
+```
+
+**Resultado esperado:** Saludo de bienvenida y estado del sistema (Health check).
+
 **Resultado esperado:** La aplicación mostrará un saludo de bienvenida y el estado del sistema (Health check).
 
 ### Importante: usar siempre el Maven Wrapper
 
 Este proyecto incluye el Maven Wrapper (`mvnw` / `mvnw.cmd`). Usar siempre el wrapper evita depender de la instalación de Maven que trae IntelliJ u otra instalación local. En IntelliJ puedes configurar el proyecto para usar el Maven Wrapper (Settings > Build, Execution, Deployment > Build Tools > Maven → Use Maven wrapper).
+dev
 
 Notas
 - Si necesitas poner temporalmente una ruta al JDK en la sesión, consulta `doc/ia/user-prompt.md`.

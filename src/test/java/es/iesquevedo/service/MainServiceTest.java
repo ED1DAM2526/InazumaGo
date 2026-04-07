@@ -18,4 +18,3 @@ public class MainServiceTest {
         assertEquals("Hello, InazumaGoPrevio!", greeting);
     }
 }
-

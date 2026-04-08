@@ -1,7 +1,7 @@
 
 ---
 
-## Step 4 (Spanish): Create test cases documentation – `doc/test-cases.md`
+## `doc/test-cases.md`
 
 ```markdown
 # Casos de prueba de integración

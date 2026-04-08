@@ -3,6 +3,7 @@ package es.iesquevedo.repository.inmemory;
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
 import es.iesquevedo.dto.MovePayload;
+import es.iesquevedo.exception.NotFoundException;
 import es.iesquevedo.repository.MainRepository;
 
 import java.util.*;
@@ -98,7 +99,7 @@ public class InMemoryMainRepository implements MainRepository {
 
             GameDto game = gamesStore.get(gameId);
             if (game == null) {
-                throw new RuntimeException("Game not found: " + gameId);
+                throw new NotFoundException("Game not found: " + gameId);
             }
 
             // Añade los movimientos al juego
@@ -158,7 +159,3 @@ public class InMemoryMainRepository implements MainRepository {
     @Override
     public String findDefaultName() { return "InazumaGoPrevio"; }
 }
-feat/primeraventana
-
-
-dev

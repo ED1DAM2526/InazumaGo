@@ -58,6 +58,7 @@ public class FirebaseMainRepository implements MainRepository {
     public String findDefaultName() {
         // TODO: Implementar llamada REST a Firebase Realtime DB y parseo de la respuesta.
         // Este placeholder permite compilar y debe sustituirse por la lógica real.
+        // Por ahora se ignora firebaseUrl hasta que se implemente la lógica real
         return "FirebasePlayer";
     }
 }

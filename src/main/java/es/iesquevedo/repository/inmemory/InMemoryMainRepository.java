@@ -8,4 +8,3 @@ public class InMemoryMainRepository implements MainRepository {
         return "InazumaGoPrevio";
     }
 }
-

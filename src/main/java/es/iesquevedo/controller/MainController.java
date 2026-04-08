@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 public class MainController {
     private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
-    
+
     private final MainService mainService;
 
     @FXML
@@ -49,4 +49,3 @@ public class MainController {
         this.salutoLabel = label;
     }
 }
-

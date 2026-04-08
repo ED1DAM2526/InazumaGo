@@ -1,6 +1,8 @@
 package es.iesquevedo.repository;
 
 import es.iesquevedo.dto.GameDto;
+import es.iesquevedo.dto.MoveData;
+import es.iesquevedo.dto.MovePayload;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;

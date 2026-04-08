@@ -33,6 +33,9 @@
             <artifactId>wiremock-standalone</artifactId>
             <version>3.12.1</version>
             <scope>test</scope>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.8.0</version>
         </dependency>
     </dependencies>
 

@@ -1,7 +1,11 @@
 
 ---
 
+E4-US2
 ## `doc/test-cases.md`
+
+## Step 4 (Spanish): Create test cases documentation – `doc/test-cases.md`
+Kyle
 
 ```markdown
 # Casos de prueba de integración
@@ -18,6 +22,7 @@
 ## Cómo ejecutar los tests de integración
 
 ```powershell
+E4-US2
 mvn test
 
 
@@ -55,3 +60,6 @@ public class EjemploTest {
         assertEquals("Hello, InazumaGoPrevio!", resultado);
     }
 }
+=======
+mvn test
+Kyle

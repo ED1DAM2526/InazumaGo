@@ -18,18 +18,21 @@ public class MainGUI extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
+            // Cargar FXML con su controlador
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
+            Parent root = (Parent) loader.load();
+            
+            // Obtener el controlador después de cargar el FXML
+            MainController mainController = loader.getController();
+            
             // Configuración de servicios
             String firebaseUrl = System.getenv("FIREBASE_URL");
             var repository = AppConfig.createMainRepository(firebaseUrl);
             var mainService = new MainServiceImpl(repository);
+            
+            // Inyectar dependencias en el controlador
+            mainController.setService(mainService);
 
-            // Crear controlador
-            MainController mainController = new MainController(mainService);
-
-            // Cargar FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
-            loader.setController(mainController);
-            Parent root = (Parent) loader.load();
 
             // Crear escena y mostrar ventana
             Scene scene = new Scene(root, 600, 400);

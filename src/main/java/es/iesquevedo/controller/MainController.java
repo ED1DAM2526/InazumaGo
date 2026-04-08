@@ -3,23 +3,26 @@ package es.iesquevedo.controller;
 import es.iesquevedo.service.MainService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MainController {
     private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
-    private final MainService mainService;
+    private MainService mainService;
 
     @FXML
     private Label salutoLabel;
 
-    public MainController(MainService mainService) {
-        this.mainService = mainService;
-    }
-
     public MainController() {
         // Constructor sin parámetros necesario para FXML
         this.mainService = null;
+    }
+
+    public void setService(MainService mainService) {
+        this.mainService = mainService;
+        // Reinicializar después de establecer el servicio
+        initialize();
     }
 
     @FXML
@@ -31,13 +34,11 @@ public class MainController {
                 salutoLabel.setText(saludo);
                 LOGGER.info("Saludo establecido: " + saludo);
             } catch (Exception e) {
-                LOGGER.severe("Error al obtener saludo del servicio: " + e.getMessage());
+                LOGGER.log(Level.SEVERE, "Error al obtener saludo del servicio", e);
                 salutoLabel.setText("Error: no se pudo cargar el saludo");
             }
-        } else {
-            if (salutoLabel != null) {
-                salutoLabel.setText("Servicio no disponible");
-            }
+        } else if (salutoLabel != null) {
+            salutoLabel.setText("Servicio no disponible");
         }
     }
 

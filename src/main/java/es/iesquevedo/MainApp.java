@@ -40,7 +40,8 @@ public class MainApp {
 
         // Crear servicio y controlador
         var service = new MainServiceImpl(repository);
-        var mainController = new MainController(service);
+        var mainController = new MainController();
+        mainController.setService(service);
 
         // Adaptadores UI
         var ui = new UIAdapter(mainController);
@@ -49,8 +50,8 @@ public class MainApp {
 
         // Uso simple: saludar y comprobar estado
         if (LOGGER.isLoggable(Level.INFO)) {
-            LOGGER.log(Level.INFO, "{0} {1}", new Object[]{DateUtils.nowIso(), ui.greet()});
-            LOGGER.log(Level.INFO, "{0} Health: {1}", new Object[]{DateUtils.nowIso(), healthUi.health()});
+            LOGGER.info(String.format("%s %s", DateUtils.nowIso(), ui.greet()));
+            LOGGER.info(String.format("%s Health: %s", DateUtils.nowIso(), healthUi.health()));
         }
     }
 }

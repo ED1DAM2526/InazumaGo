@@ -81,6 +81,12 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- SonarQube Maven Plugin para análisis estático -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.1.2184</version>
+            </plugin>
         </plugins>
     </build>
 

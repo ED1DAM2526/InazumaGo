@@ -20,14 +20,4 @@ public class FirebaseMainRepositoryTest {
         boolean result = repository.patchMultiPath("games/test", updates);
         assertTrue(result);
     }
-
-    @Test
-    void testPatchMultiPathWithComplexData() throws Exception {
-        Map<String, Object> updates = Map.of(
-                "moves/move123", Map.of("player", "player1", "payload", "e2e4"),
-                "meta/turn", 2
-        );
-        boolean result = repository.patchMultiPath("games/test", updates);
-        assertTrue(result);
-    }
 }

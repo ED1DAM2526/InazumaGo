@@ -14,18 +14,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!-- Dependencias de test -->
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.10.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -36,7 +29,6 @@
         </dependency>
     </dependencies>
 
-    <!-- Plugin para ejecutar tests con JUnit Platform -->
     <build>
         <plugins>
             <plugin>
@@ -44,11 +36,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <!-- Evita problemas con el module path en JDK modernos -->
                     <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
-            <!-- JaCoCo para medir cobertura: agregamos un plugin de reporte sencillo -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -71,5 +61,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

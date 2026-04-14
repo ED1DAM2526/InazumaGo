@@ -2,7 +2,7 @@ package es.iesquevedo.repository.firebase;
 
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
-import es.iesquevedo.dto.MovePayload;
+import es.iesquevedo.dto.MoveDto;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +30,7 @@ public class FirebaseGameRepositoryStub implements FirebaseGameRepository {
     }
 
     @Override
-    public CompletableFuture<Void> writeMoveMultiPath(String gameId, MovePayload payload) {
+    public CompletableFuture<Void> writeMoveMultiPath(String gameId, MoveDto payload) {
         // Simula lógica: si gameId contiene "invalid", lanza excepción para simular 403
         if (gameId != null && gameId.contains("invalid")) {
             CompletableFuture<Void> failed = new CompletableFuture<>();
@@ -58,5 +58,10 @@ public class FirebaseGameRepositoryStub implements FirebaseGameRepository {
             }
         }).start();
         return listenerId;
+    }
+
+    @Override
+    public String findDefaultName() {
+        return "StubPlayer";
     }
 }

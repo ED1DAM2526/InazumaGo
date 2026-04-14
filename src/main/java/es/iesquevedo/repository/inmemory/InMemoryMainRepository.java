@@ -2,8 +2,8 @@ package es.iesquevedo.repository.inmemory;
 
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
-import es.iesquevedo.dto.MovePayload;
-import es.iesquevedo.repository.MainRepository;
+import es.iesquevedo.dto.MoveDto;
+import es.iesquevedo.repository.firebase.FirebaseGameRepository;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  * - Soporta listeners de cambios
  * - Se resetea cada ejecución (no persiste)
  */
-public class InMemoryMainRepository implements MainRepository {
+public class InMemoryMainRepository implements FirebaseGameRepository {
 
     private final Map<String, GameDto> gamesStore = new ConcurrentHashMap<>();
     private final Map<String, List<Consumer<List<MoveData>>>> listeners = new ConcurrentHashMap<>();
@@ -87,7 +87,7 @@ public class InMemoryMainRepository implements MainRepository {
     }
 
     @Override
-    public CompletableFuture<Void> writeMoveMultiPath(String gameId, MovePayload payload) {
+    public CompletableFuture<Void> writeMoveMultiPath(String gameId, MoveDto payload) {
         // Simula una escritura PATCH
         return CompletableFuture.runAsync(() -> {
             try {
@@ -129,10 +129,8 @@ public class InMemoryMainRepository implements MainRepository {
     }
 
     @Override
-    public void removeMovesListener(String gameId, String listenerId) {
-        // En esta implementación simple, removemos todos los listeners.
-        // Una implementación real mantendría un registro de IDs.
-        listeners.remove(gameId);
+    public String findDefaultName() {
+        return "InazumaGoPrevio!";
     }
 
     /**
@@ -154,9 +152,6 @@ public class InMemoryMainRepository implements MainRepository {
         gamesStore.clear();
         listeners.clear();
     }
-
-    @Override
-    public String findDefaultName() { return "InazumaGoPrevio"; }
 }
 
 

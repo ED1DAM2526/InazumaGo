@@ -14,7 +14,7 @@ public final class AppConfig {
      * se devuelve una implementación en memoria (útil para pruebas locales). Si se
      * proporciona una URL, se devuelve el repositorio orientado a Firebase.
      */
-    public static es.iesquevedo.repository.MainRepository createMainRepository(String firebaseUrl) {
+    public static es.iesquevedo.repository.firebase.FirebaseGameRepository createMainRepository(String firebaseUrl) {
         if (firebaseUrl == null || firebaseUrl.isBlank()) {
             return new es.iesquevedo.repository.inmemory.InMemoryMainRepository();
         }
@@ -24,14 +24,14 @@ public final class AppConfig {
     /**
      * Atajo para obtener la implementación en memoria (tests).
      */
-    public static es.iesquevedo.repository.MainRepository createInMemoryRepository() {
+    public static es.iesquevedo.repository.firebase.FirebaseGameRepository createInMemoryRepository() {
         return new es.iesquevedo.repository.inmemory.InMemoryMainRepository();
     }
 
     /**
      * Atajo para obtener la implementación orientada a Firebase (producción).
      */
-    public static es.iesquevedo.repository.MainRepository createFirebaseRepository(String firebaseUrl) {
+    public static es.iesquevedo.repository.firebase.FirebaseGameRepository createFirebaseRepository(String firebaseUrl) {
         return new es.iesquevedo.repository.firebase.FirebaseMainRepository(firebaseUrl);
     }
 }

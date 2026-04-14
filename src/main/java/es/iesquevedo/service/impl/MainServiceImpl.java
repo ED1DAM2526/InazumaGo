@@ -1,13 +1,13 @@
 package es.iesquevedo.service.impl;
 
-import es.iesquevedo.repository.MainRepository;
+import es.iesquevedo.repository.firebase.FirebaseGameRepository;
 import es.iesquevedo.service.MainService;
 import java.util.Objects;
 
 public class MainServiceImpl implements MainService {
-    private final MainRepository repository;
+    private final FirebaseGameRepository repository;
 
-    public MainServiceImpl(MainRepository repository) {
+    public MainServiceImpl(FirebaseGameRepository repository) {
         this.repository = repository;
     }
 

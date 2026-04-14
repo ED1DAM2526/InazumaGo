@@ -2,7 +2,7 @@ package es.iesquevedo.repository.firebase;
 
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
-import es.iesquevedo.dto.MovePayload;
+import es.iesquevedo.dto.MoveDto;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -66,7 +66,7 @@ public interface FirebaseGameRepository {
      * @param payload objeto con la estructura de movimientos
      * @return CompletableFuture que resuelve cuando se confirma la escritura
      */
-    CompletableFuture<Void> writeMoveMultiPath(String gameId, MovePayload payload);
+    CompletableFuture<Void> writeMoveMultiPath(String gameId, MoveDto payload);
 
     /**
      * Suscribe un listener a cambios en los movimientos de una partida para actualizaciones en tiempo real.
@@ -92,4 +92,12 @@ public interface FirebaseGameRepository {
      * @return ID de la suscripción (para poder desuscribirse después)
      */
     String addMovesListener(String gameId, Consumer<List<MoveData>> listener);
+
+    /**
+     * Obtiene el nombre por defecto del jugador o partida.
+     * Útil para inicialización y saludos.
+     *
+     * @return nombre por defecto
+     */
+    String findDefaultName();
 }

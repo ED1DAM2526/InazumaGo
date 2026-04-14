@@ -45,6 +45,20 @@
             <artifactId>firebase-admin</artifactId>
             <version>9.8.0</version>
         </dependency>
+
+        <!-- Mockito dependancies -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -58,6 +72,14 @@
                     <excludes>
                         <exclude>**/MainTest.java</exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>es.iesquevedo.MainGUI</mainClass>
                 </configuration>
             </plugin>
             <plugin>

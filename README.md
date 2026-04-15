@@ -183,3 +183,14 @@ Para contribuir:
 - [`scripts/`](scripts/) — Scripts útiles de PowerShell
 - [`doc/ia/`](doc/ia/) — Prompts para IA (no editar sin consentimiento del equipo)
 powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -JdkPath 'C:\Program Files\Java\jdk-17' -RunMaven -RunMain
+
+
+## Versiones utilizadas
+
+| Herramienta | Versión |
+|-------------|---------|
+| Java | 21 |
+| Maven | 3.9+ |
+| JUnit | 5.10.0 |
+| WireMock | 2.35.0 |
+| JaCoCo | 0.8.12 |

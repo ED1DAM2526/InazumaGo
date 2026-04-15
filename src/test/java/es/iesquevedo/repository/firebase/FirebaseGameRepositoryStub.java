@@ -24,35 +24,50 @@ public class FirebaseGameRepositoryStub implements FirebaseGameRepository {
 
     @Override
     public CompletableFuture<GameDto> getGame(String gameId) {
-        // Simula respuesta 200: devuelve un GameDto simulado
-        GameDto simulatedGame = new GameDto("simulated-" + gameId, "Simulated Game", List.of("player1", "player2"), "IN_PROGRESS", System.currentTimeMillis());
-        return CompletableFuture.completedFuture(simulatedGame);
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(timeout); // Simula timeout
+                if (endpoint.contains("error")) {
+                    return null; // Simula 404 o error
+                }
+                // Simula respuesta 200: devuelve un GameDto simulado
+                GameDto simulatedGame = new GameDto("simulated-" + gameId, "Simulated Game", List.of("player1", "player2"), "IN_PROGRESS", System.currentTimeMillis());
+                return simulatedGame;
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Simulated timeout");
+            }
+        });
     }
 
     @Override
     public CompletableFuture<Void> writeMoveMultiPath(String gameId, MoveDto payload) {
-        // Simula lógica: si gameId contiene "invalid", lanza excepción para simular 403
-        if (gameId != null && gameId.contains("invalid")) {
-            CompletableFuture<Void> failed = new CompletableFuture<>();
-            failed.completeExceptionally(new RuntimeException("Simulated 403: Invalid game"));
-            return failed;
-        }
-        // Simula respuesta 200: éxito
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(timeout); // Simula timeout
+                if (endpoint.contains("error") || (gameId != null && gameId.contains("invalid"))) {
+                    throw new RuntimeException("Simulated 403: Invalid game or endpoint error");
+                }
+                // Simula respuesta 200: éxito
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Simulated timeout");
+            }
+        });
     }
 
     @Override
     public String addMovesListener(String gameId, Consumer<List<MoveData>> listener) {
-        // Simula listener: dispara un evento falso después de un delay simulado
+        // Simula listener: dispara un evento falso después de un delay simulado usando timeout
         String listenerId = "listener-" + gameId + "-" + System.currentTimeMillis();
         new Thread(() -> {
             try {
-                Thread.sleep(100); // Simula delay
-                List<MoveData> simulatedMoves = List.of(
-                    new MoveData("player1", "KICK", null),
-                    new MoveData("player2", "PASS", null)
-                );
-                listener.accept(simulatedMoves);
+                Thread.sleep(timeout); // Usa timeout para delay
+                if (!endpoint.contains("error")) {
+                    List<MoveData> simulatedMoves = List.of(
+                        new MoveData("player1", "KICK", null),
+                        new MoveData("player2", "PASS", null)
+                    );
+                    listener.accept(simulatedMoves);
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

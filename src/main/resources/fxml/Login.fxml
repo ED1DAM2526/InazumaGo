@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="es.iesquevedo.controller.LoginController">
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0"/>
+    </padding>
+
+    <!-- Título -->
+    <Label text="InazumaGo" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
+    <Label text="Iniciar sesión" style="-fx-font-size: 16; -fx-text-fill: #666666;"/>
+
+    <!-- Espaciador -->
+    <VBox spacing="5.0" VBox.vgrow="SOMETIMES"/>
+
+    <!-- Campo Email -->
+    <Label text="Email:" style="-fx-font-size: 12; -fx-text-fill: #333333;"/>
+    <TextField fx:id="emailField" promptText="tu.email@ejemplo.com"
+               style="-fx-font-size: 12;"/>
+
+    <!-- Campo Contraseña -->
+    <Label text="Contraseña:" style="-fx-font-size: 12; -fx-text-fill: #333333;"/>
+    <PasswordField fx:id="passwordField" promptText="Tu contraseña"
+                   style="-fx-font-size: 12;"/>
+
+    <!-- Espaciador -->
+    <VBox spacing="5.0" VBox.vgrow="SOMETIMES"/>
+
+    <!-- Botones -->
+    <HBox spacing="10.0" alignment="CENTER">
+        <Button text="Iniciar sesión" onAction="#onLoginClicked"
+                style="-fx-padding: 10px 30px; -fx-font-size: 12; -fx-font-weight: bold;"
+                HBox.hgrow="SOMETIMES"/>
+        <Button text="Limpiar" onAction="#onClearClicked"
+                style="-fx-padding: 10px 20px; -fx-font-size: 12;"
+                HBox.hgrow="SOMETIMES"/>
+    </HBox>
+
+    <!-- Label de estado -->
+    <Label fx:id="statusLabel" text=""
+           style="-fx-font-size: 12; -fx-text-fill: #333333;"
+           wrapText="true"/>
+
+    <!-- Espaciador final -->
+    <VBox spacing="5.0" VBox.vgrow="SOMETIMES"/>
+
+    <!-- Footer de información -->
+    <Label text="Demo: Usa cualquier email y contraseña"
+            style="-fx-font-size: 10; -fx-text-fill: #999999;"/>
+</VBox>
+

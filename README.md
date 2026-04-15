@@ -10,6 +10,7 @@ Notas rápidas:
 Documentación importante:
 
 - `doc/normas-trabajo-proyecto.md` — Normas de trabajo del proyecto: flujo de ramas, PR, revisiones, merges, incidencias, hotfix y criterios de cierre.
+- `doc/error-handling.md` — Patrón centralizado de manejo de errores, estructura de `ApiError` y ejemplos de payload JSON.
 
 Cómo compilar y probar
 

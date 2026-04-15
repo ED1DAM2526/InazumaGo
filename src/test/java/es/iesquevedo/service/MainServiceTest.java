@@ -41,7 +41,6 @@ public class MainServiceTest {
 
         assertEquals("Default player name not found", exception.getMessage());
     }
-}
 
     @Test
     void testGreetNotNull() {

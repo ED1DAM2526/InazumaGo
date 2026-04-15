@@ -149,6 +149,18 @@ Historias de usuario por épica
   - Dependencias: E3-US1, E2-US3
   - Equipo: UI, QA
 
+- E3-US3 — Como jugador, quiero poder jugar una partida completa con otro jugador para completar una sesión multijugador de inicio a fin.
+  - ID: E3-US3
+  - Criterios de aceptación:
+    1. Un jugador puede crear/iniciar partida y un segundo jugador puede unirse; el estado inicial queda sincronizado en ambos clientes.
+    2. El flujo de turnos permite realizar movimientos válidos alternos hasta condición de fin (victoria/derrota o abandono), con estado final visible en UI.
+    3. Ante rechazo de movimiento (403/reglas), el cliente realiza rollback y muestra feedback claro sin desincronizar la partida.
+    4. Existe al menos un test de integración end-to-end con stubs (WireMock) que cubre happy path de partida completa y otro con interrupción/reintento.
+    5. La guía de demo local documenta cómo ejecutar una partida de dos jugadores con datos simulados.
+  - Estimación: L
+  - Dependencias: E3-US2, E2-US4, E2-US5, E4-US2
+  - Equipo: UI, Motor, Red, QA
+
 (E4) Testing, Calidad y CI/CD
 
 - E4-US1 — Como equipo, quiero una pipeline CI que ejecute `mvn test` y `mvn package` para garantizar builds reproducibles.
@@ -247,37 +259,37 @@ Sprint 2 (7–16 de abril) — Repositorios y UI esqueleto
 
 Sprint 3 (20–29 de abril) — Integración Firebase (staging)
 
-- Objetivo del sprint: Implementar cliente HTTP configurable para Firebase, login UI con token y pruebas de integración más sólidas.
+- Objetivo del sprint: Implementar cliente HTTP configurable para Firebase, login UI con token, primer flujo jugable multiusuario y pruebas de integración más sólidas.
 - Historias asignadas:
-  - Motor: apoyo en la integración del servicio con repositorios (manejo de errores y contratos)
-  - UI: E3-US2 (login UI realista usando `AuthService` + token flow)
-  - Red: Completar E2-US2 (cliente HTTP real configurable, tests con mocks) y E2-US3 (AuthService integrado)
+  - Motor: apoyo en la integración del servicio con repositorios (manejo de errores y contratos) e inicio de E3-US3 (estado de partida y validaciones de turno)
+  - UI: E3-US2 (login UI realista usando `AuthService` + token flow) e inicio de E3-US3 (tablero/turnos y estado de partida)
+  - Red: Completar E2-US2 (cliente HTTP real configurable, tests con mocks), E2-US3 (AuthService integrado) y soporte de sincronización para E3-US3
   - DevOps: E5-US1 iniciar scripts de packaging y manejo de variables (documentado)
-  - QA: Tests de integración que mockean respuestas Firebase y cubren login+fetch
+  - QA: Tests de integración que mockean respuestas Firebase y cubren login+fetch + base de E3-US3
 - Entregables:
-  - Motor: Adaptaciones del core para integración realista (mapeo de errores, contratos estables).
-  - UI: Login UI que persiste token en memoria y muestra estado de usuario.
-  - Red: `FirebaseMainRepository` con tests que mockean HTTP responses y `AuthService` integrado.
+  - Motor: Adaptaciones del core para integración realista (mapeo de errores, contratos estables) y modelo de estado de partida listo para integración.
+  - UI: Login UI que persiste token en memoria y flujo jugable inicial (inicio/unión + turnos básicos).
+  - Red: `FirebaseMainRepository` con tests que mockean HTTP responses, `AuthService` integrado y endpoints/stubs de partida en tiempo real.
   - DevOps: Script de packaging básico y checklist de seguridad.
-  - QA: Test suite de integración en CI con stubs.
-- Criterio de demo: Demo mostrando login → token → fetch de datos simulado; tests de integración en CI.
+  - QA: Test suite de integración en CI con stubs y casos base de partida multijugador.
+- Criterio de demo: Demo mostrando login -> token -> inicio de partida -> intercambio de movimientos simulado; tests de integración en CI.
 
 Sprint 4 (4–15 de mayo) — Pulido, QA y Release
 
-- Objetivo del sprint: Pulir, completar tests, pipeline completo y empaquetado de release candidate.
+- Objetivo del sprint: Pulir, cerrar flujo de partida completa multijugador, completar tests, pipeline completo y empaquetado de release candidate.
 - Historias asignadas:
-  - Motor: Polishing del core y cobertura de tests faltantes (E1-US3 complementos)
-  - UI: Mejoras UI/UX, manejo de errores visuales y cache básico (opcional)
-  - Red: Optimización del cliente HTTP y ajustes finales de repositorios
+  - Motor: Polishing del core y cobertura de tests faltantes (E1-US3 complementos + cierre E3-US3)
+  - UI: Mejoras UI/UX, manejo de errores visuales y cierre de E3-US3 (fin de partida y estados)
+  - Red: Optimización del cliente HTTP, ajustes finales de repositorios y cierre de sincronización E3-US3
   - DevOps: Pipeline completo (E4-US1) y empaquetado final (E5-US1)
-  - QA: Test de aceptación end-to-end y reporte final
+  - QA: Test de aceptación end-to-end, cobertura de E3-US3 y reporte final
 - Entregables:
-  - Motor: Código final del core y cobertura mínima acordada (unit + integración).
-  - UI: UI lista para demo y validada con packaging.
-  - Red: Cliente HTTP robusto y documentación de integración.
+  - Motor: Código final del core, cobertura mínima acordada (unit + integración) y reglas de estado de partida cerradas.
+  - UI: UI lista para demo, partida completa jugable y validada con packaging.
+  - Red: Cliente HTTP robusto, sincronización estable para partida completa y documentación de integración.
   - DevOps: Pipeline que publica artefactos en `target/releases/` y `scripts/package.ps1`.
-  - QA: Informe de pruebas y OK para release candidate.
-- Criterio de demo: Release candidate empaquetado; demo de app funcional con login + fetch simulado; todos los tests pasan en CI.
+  - QA: Informe de pruebas, evidencia de partida completa multijugador y OK para release candidate.
+- Criterio de demo: Release candidate empaquetado; demo de app funcional con login + partida completa entre dos jugadores (simulada con stubs); todos los tests pasan en CI.
 
 Criterios transversales (mínimos)
 
@@ -289,13 +301,14 @@ Criterios transversales (mínimos)
 
 Estimaciones y prioridades (resumen)
 
-- Prioridad alta: E1-US1, E1-US2, E2-US1, E3-US1, E4-US1 (permiten demos y build estable).
+- Prioridad alta: E1-US1, E1-US2, E2-US1, E3-US1, E4-US1, E3-US3 (objetivo funcional de release).
 - Estimaciones: S = Small (1-2 días persona), M = Medium (3-7 días persona), L = Large (>7 días persona).
 - Dependencias clave:
   - E1-US2 depende de E1-US1
   - E2-US2 depende de E2-US1 y E1-US3
   - E2-US3 depende de E2-US2
   - E3-US2 depende de E3-US1 y E2-US3
+  - E3-US3 depende de E3-US2, E2-US4, E2-US5 y E4-US2
   - E4-US2 depende de E2-US2 y E3-US1
   - E5-US1 depende de E4-US1 y E3-US1
 
@@ -457,6 +470,32 @@ A continuación cada historia de usuario se descompone en tareas lo más pequeñ
 - E3-US2-T4 (QA): Tests de integración que verifiquen login->token guardado y uso posterior en llamadas.
   - AC: Test automatizado que simula login y comprueba que `FirebaseHttpClient` incluye token.
   - Est. 3h
+
+(E3-US3) Partida completa multijugador (enlazada a E3; ejecución Sprint 3 y 4)
+- E3-US3-T1 (UI) [Sprint 3]: Crear flujo UI para crear/unirse a partida (vista, acciones y estado inicial compartido).
+  - AC: Dos clientes pueden abrir la misma partida simulada y visualizar tablero/estado inicial sincronizado.
+  - Est. 4h
+- E3-US3-T2 (Motor) [Sprint 3]: Implementar lógica de turnos y estado de partida (EN_CURSO, FINALIZADA, ABANDONADA) en servicio.
+  - AC: El servicio rechaza jugadas fuera de turno y expone estado de partida para UI.
+  - Est. 4h
+- E3-US3-T3 (Red) [Sprint 3]: Integrar repositorio Firebase para sincronizar eventos de partida (inicio, move, fin) con stubs WireMock.
+  - AC: Cliente persiste y recupera eventos de partida; tests cubren 200 y 403 en flujo de turnos.
+  - Est. 5h
+- E3-US3-T4 (QA) [Sprint 3]: Crear pruebas de integración base de partida de dos jugadores (inicio + 2-3 turnos).
+  - AC: Suite automática ejecutable en `mvn test` con reporte en `surefire-reports`.
+  - Est. 4h
+- E3-US3-T5 (Motor/Red) [Sprint 4]: Implementar cierre de partida (condiciones de victoria/abandono) y reconciliación final.
+  - AC: Se persiste estado final único y ambos clientes muestran resultado consistente.
+  - Est. 5h
+- E3-US3-T6 (UI) [Sprint 4]: Añadir feedback visual de fin de partida, errores y opción de nueva partida.
+  - AC: UI muestra ganador/resultado, mensaje de error claro y permite reiniciar flujo.
+  - Est. 3h
+- E3-US3-T7 (QA) [Sprint 4]: Tests end-to-end de partida completa (happy path, rechazo con rollback, reconexión/reintento).
+  - AC: Casos automatizados y documentados en `doc/test-cases.md`.
+  - Est. 6h
+- E3-US3-T8 (Doc) [Sprint 4]: Documentar demo reproducible de partida completa en README y manual de usuario.
+  - AC: Pasos verificables para ejecutar demo de dos jugadores con stubs sin credenciales reales.
+  - Est. 2h
 
 (E4-US1) Pipeline CI básica
 - E4-US1-T1 (DevOps): Script `scripts/run-tests.ps1` que lanza `mvn -DskipTests=false test` y exporta resultados.

@@ -52,6 +52,9 @@ Lee los siguientes documentos para entender el proyecto:
 # Tests con Maven (recomendado)
 mvn -DskipTests=false test
 
+# Variante silenciosa recomendada para CI/local
+mvn -q -DskipTests=false test
+
 # Ver resultados
 # Los reportes de Surefire estarán en target/surefire-reports/
 ```
@@ -172,14 +175,13 @@ src/
 Para contribuir:
 
 1. Lee [`doc/normas-trabajo-proyecto.md`](doc/normas-trabajo-proyecto.md)
-2. Crea una rama desde `develop`: `git checkout -b feature/descripción`
+2. Crea una rama desde `dev`: `git checkout -b feature/descripcion`
 3. Haz commit con mensajes descriptivos
 4. Abre un PR y espera revisiones
-5. Merge a `develop` una vez aprobado
+5. Merge a `dev` una vez aprobado
 
 ### Más información
 
 - [`doc/epicas-historias-sprints.md`](doc/epicas-historias-sprints.md) — Plan de sprints y historias de usuario
 - [`scripts/`](scripts/) — Scripts útiles de PowerShell
 - [`doc/ia/`](doc/ia/) — Prompts para IA (no editar sin consentimiento del equipo)
-powershell -ExecutionPolicy Bypass -File .\scripts\use-user-jdk.ps1 -JdkPath 'C:\Program Files\Java\jdk-17' -RunMaven -RunMain

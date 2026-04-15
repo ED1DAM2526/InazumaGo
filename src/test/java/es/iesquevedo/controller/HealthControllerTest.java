@@ -8,7 +8,7 @@ public class HealthControllerTest {
     @Test
     public void health_shouldReturnOK() {
         HealthController controller = new HealthController();
-        assertEquals("OK", controller.health());
+        assertEquals(HealthController.STATUS_OK, controller.health());
     }
 }
 

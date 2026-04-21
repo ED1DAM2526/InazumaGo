@@ -3,16 +3,17 @@ package es.iesquevedo.repository.firebase;
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
 import es.iesquevedo.dto.MoveDto;
+import es.iesquevedo.repository.MainRepository;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
- * Stub ligero para FirebaseGameRepository, usado en pruebas de integración.
+ * Stub ligero de MainRepository con semántica de backend Firebase para pruebas.
  * Simula respuestas HTTP (200 para éxito, 403 para errores) y acepta configuración de endpoint/timeout.
  */
-public class FirebaseGameRepositoryStub implements FirebaseGameRepository {
+public class FirebaseGameRepositoryStub implements MainRepository {
 
     private final String endpoint;
     private final int timeout;

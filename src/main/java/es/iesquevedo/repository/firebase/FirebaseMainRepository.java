@@ -3,6 +3,7 @@ package es.iesquevedo.repository.firebase;
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
 import es.iesquevedo.dto.MoveDto;
+import es.iesquevedo.repository.MainRepository;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -22,7 +23,7 @@ import java.util.function.Consumer;
  * Implementación de producción del repositorio basada en Firebase Realtime Database (SDK).
  * Utiliza Firebase Admin SDK para operaciones en tiempo real, incluyendo lectura, escritura atómica y listeners.
  */
-public class FirebaseMainRepository implements FirebaseGameRepository {
+public class FirebaseMainRepository implements MainRepository {
     private final FirebaseDatabase database;
     @SuppressWarnings({"FieldCanBeLocal", "CollectionWithoutInitialCapacity", "MismatchedQueryAndUpdateOfCollection"})
     private final Map<String, ValueEventListener> listeners = new HashMap<>();

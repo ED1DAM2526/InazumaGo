@@ -3,7 +3,7 @@ package es.iesquevedo.repository.inmemory;
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
 import es.iesquevedo.dto.MoveDto;
-import es.iesquevedo.repository.firebase.FirebaseGameRepository;
+import es.iesquevedo.repository.MainRepository;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  * - Soporta listeners de cambios
  * - Se resetea cada ejecución (no persiste)
  */
-public class InMemoryMainRepository implements FirebaseGameRepository {
+public class InMemoryMainRepository implements MainRepository {
 
     private final Map<String, GameDto> gamesStore = new ConcurrentHashMap<>();
     private final Map<String, List<Consumer<List<MoveData>>>> listeners = new ConcurrentHashMap<>();

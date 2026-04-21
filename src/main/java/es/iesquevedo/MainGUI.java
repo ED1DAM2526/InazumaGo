@@ -1,8 +1,7 @@
 package es.iesquevedo;
 
-import es.iesquevedo.config.AppConfig;
-import es.iesquevedo.controller.MainController;
-import es.iesquevedo.service.impl.MainServiceImpl;
+import es.iesquevedo.controller.LoginController;
+import es.iesquevedo.service.auth.AuthServiceMock;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,30 +17,24 @@ public class MainGUI extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Cargar FXML con su controlador
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
+            // Cargar FXML de Login con su controlador
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
             Parent root = (Parent) loader.load();
             
             // Obtener el controlador después de cargar el FXML
-            MainController mainController = loader.getController();
+            LoginController loginController = loader.getController();
             
-            // Configuración de servicios
-            String firebaseUrl = System.getenv("FIREBASE_URL");
-            var repository = AppConfig.createMainRepository(firebaseUrl);
-            var mainService = new MainServiceImpl(repository);
-            
-            // Inyectar dependencias en el controlador
-            mainController.setService(mainService);
-
+            // Inyectar el servicio de autenticación (mock para desarrollo)
+            loginController.setAuthService(new AuthServiceMock());
 
             // Crear escena y mostrar ventana
             Scene scene = new Scene(root, 600, 400);
-            primaryStage.setTitle("InazumaGo");
+            primaryStage.setTitle("InazumaGo - Login");
             primaryStage.setScene(scene);
             primaryStage.show();
 
             if (LOGGER.isLoggable(Level.INFO)) {
-                LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada exitosamente");
+                LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada exitosamente (Login)");
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al iniciar la aplicación", e);

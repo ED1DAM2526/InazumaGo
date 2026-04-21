@@ -3,11 +3,11 @@ package es.iesquevedo.service.impl;
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
 import es.iesquevedo.dto.MoveDto;
+import es.iesquevedo.exception.NotFoundException;
 import es.iesquevedo.repository.MainRepository;
 import es.iesquevedo.service.MainService;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -20,8 +20,10 @@ public class MainServiceImpl implements MainService {
 
     @Override
     public String greet() {
-        String name = Objects.toString(repository.findDefaultName(), "player").trim();
-        // Evita NPE si el repositorio devuelve null
+        String name = repository.findDefaultName();
+        if (name == null || name.isBlank()) {
+            throw new NotFoundException("Default player name not found");
+        }
         return name.endsWith("!") ? "Hello, " + name : "Hello, " + name + "!";
     }
 

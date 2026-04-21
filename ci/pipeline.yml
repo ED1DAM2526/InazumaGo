@@ -1,0 +1,28 @@
+# Plantilla CI generica (adaptar al proveedor)
+# Objetivo: ejecutar tests Maven en cada push/PR.
+
+name: inazumago-ci
+
+triggers:
+  - push
+  - pull_request
+
+jobs:
+  - id: test
+    name: Maven Tests
+    image: eclipse-temurin:21
+    steps:
+      - checkout
+      - restore_cache:
+          key: maven-cache
+          paths:
+            - ~/.m2/repository
+      - run: ./mvnw -B -DskipTests=false test
+      - save_cache:
+          key: maven-cache
+          paths:
+            - ~/.m2/repository
+      - collect_artifacts:
+          paths:
+            - target/surefire-reports/**
+

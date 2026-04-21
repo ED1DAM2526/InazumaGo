@@ -17,4 +17,3 @@ public interface MainService {
 
     String addMovesListener(String gameId, Consumer<List<MoveData>> listener);
 }
-

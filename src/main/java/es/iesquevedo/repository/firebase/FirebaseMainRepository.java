@@ -6,23 +6,20 @@ import es.iesquevedo.dto.MoveDto;
 import es.iesquevedo.repository.MainRepository;
 
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
-/**
- * Implementación de producción del repositorio basada en Firebase Realtime Database (SDK).
- * Utiliza Firebase Admin SDK para operaciones en tiempo real, incluyendo lectura, escritura atómica y listeners.
- */
 public class FirebaseMainRepository implements MainRepository {
     private final FirebaseDatabase database;
     @SuppressWarnings({"FieldCanBeLocal", "CollectionWithoutInitialCapacity", "MismatchedQueryAndUpdateOfCollection"})
@@ -75,7 +72,8 @@ public class FirebaseMainRepository implements MainRepository {
         ValueEventListener vel = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                GenericTypeIndicator<List<MoveData>> t = new GenericTypeIndicator<>() {};
+                GenericTypeIndicator<List<MoveData>> t = new GenericTypeIndicator<>() {
+                };
                 List<MoveData> moves = snapshot.getValue(t);
                 listener.accept(moves);
             }
@@ -118,13 +116,9 @@ public class FirebaseMainRepository implements MainRepository {
         return result[0] != null ? result[0] : "DefaultPlayer";
     }
 
-    /**
-     * Remueve un listener previamente registrado por su ID.
-     *
-     * @param listenerId ID del listener retornado por addMovesListener
-     */
-    @SuppressWarnings("unused")
-    public void removeMovesListener(String listenerId) {
-        listeners.remove(listenerId);
+    // Método adicional para pruebas con WireMock (no está en la interfaz)
+    public boolean patchMultiPath(String path, Map<String, Object> updates) throws IOException {
+        // TODO: Implementar llamada HTTP real con OkHttp
+        return true;
     }
 }

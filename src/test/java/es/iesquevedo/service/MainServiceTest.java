@@ -7,9 +7,10 @@ import es.iesquevedo.service.impl.MainServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MainServiceTest {
 
@@ -41,7 +42,6 @@ public class MainServiceTest {
 
         assertEquals("Default player name not found", exception.getMessage());
     }
-}
 
     @Test
     void testGreetNotNull() {

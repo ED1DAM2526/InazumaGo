@@ -3,6 +3,8 @@ package es.iesquevedo.config;
 import es.iesquevedo.repository.MainRepository;
 import es.iesquevedo.repository.firebase.FirebaseMainRepository;
 import es.iesquevedo.repository.inmemory.InMemoryMainRepository;
+import es.iesquevedo.service.MainService;
+import es.iesquevedo.service.impl.MainServiceImpl;
 
 /**
  * Clase de configuración ligera del proyecto. Contiene fábricas estáticas para obtener
@@ -37,5 +39,12 @@ public final class AppConfig {
      */
     public static MainRepository createFirebaseRepository(String firebaseUrl) {
         return new FirebaseMainRepository(firebaseUrl);
+    }
+
+    /**
+     * Crea el servicio principal a partir del repositorio configurado.
+     */
+    public static MainService createMainService(String firebaseUrl) {
+        return new MainServiceImpl(createMainRepository(firebaseUrl));
     }
 }

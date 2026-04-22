@@ -1,5 +1,24 @@
 package es.iesquevedo.service.auth;
 
+ E3-US2-T4
+import java.util.Optional;
+
+/**
+ * Implementacion de desarrollo para simular login sin dependencia externa.
+ */
+public class AuthServiceMock implements AuthService {
+    private String token;
+
+    @Override
+    public String login(String email, String password) {
+        this.token = "dev-token-" + email;
+        return this.token;
+    }
+
+    @Override
+    public Optional<String> getToken() {
+        return Optional.ofNullable(token);
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,6 +94,7 @@ public class AuthServiceMock implements AuthService {
     public void simulateExpiration() {
         LOGGER.log(Level.INFO, "Token expirado simulado");
         this.currentToken = null;
+ dev
     }
 }
 

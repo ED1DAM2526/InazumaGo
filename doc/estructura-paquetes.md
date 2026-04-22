@@ -65,6 +65,7 @@ Este documento explica la estructura de carpetas y paquetes que hemos creado baj
 ## Tests (src/test/java)
 - `es.iesquevedo.controller.HealthControllerTest` — prueba unitaria de `HealthController`.
 - `es.iesquevedo.service.MainServiceTest` — prueba unitaria de `MainService` usando `InMemoryMainRepository`.
+- `es.iesquevedo.integration.MainControllerIntegrationTest` — prueba de integración que verifica la delegación entre `MainController` → `MainService` → `InMemoryMainRepository`.
 
 Cómo ejecutar los tests (desde la raíz del proyecto):
 

@@ -66,6 +66,35 @@ mvn clean package
 # El JAR se genera en target/InazumaGo-1.0-SNAPSHOT.jar
 ```
 
+### Script de packaging (E5-US1)
+
+```powershell
+# Packaging normal (con tests)
+.\scripts\package.ps1
+
+# Packaging rapido (sin tests)
+.\scripts\package.ps1 -SkipTests
+```
+
+Variables opcionales para el script:
+
+```powershell
+# Cambia la carpeta de salida de releases (por defecto: target\releases)
+$env:INAZUMAGO_RELEASE_DIR = 'C:\tmp\inazumago-releases'
+
+# Fuerza saltar tests sin pasar -SkipTests
+$env:INAZUMAGO_PACKAGE_SKIP_TESTS = 'true'
+```
+
+El script copia el JAR final a `target/releases/` (o al directorio configurado).
+
+Checklist de seguridad de packaging:
+- [ ] Verificar que no hay credenciales en código ni en `application.properties` antes de empaquetar.
+- [ ] Mantener credenciales solo en variables de entorno o archivos locales ignorados (por ejemplo `doc/ia/user-prompt.md`).
+- [ ] Confirmar que `.gitignore` excluye archivos locales sensibles antes de hacer commit.
+- [ ] Revisar el contenido de `target/releases/` para asegurar que solo se publica el artefacto esperado.
+- [ ] No subir tokens, claves ni URLs privadas en logs o documentación del release.
+
 ### Usar el script de JDK local
 
 Si necesitas usar un JDK específico configurado en `doc/ia/user-prompt.md`:

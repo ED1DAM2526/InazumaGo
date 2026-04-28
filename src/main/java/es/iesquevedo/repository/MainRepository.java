@@ -1,60 +1,34 @@
 package es.iesquevedo.repository;
 
-import es.iesquevedo.dto.GameDto;
-import es.iesquevedo.dto.MoveData;
-import es.iesquevedo.dto.MovePayload;
+import java.util.Map;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-
-/**
- * Contrato para el repositorio que gestiona partidas (Games) y movimientos (Moves).
- * Puede trabajar contra Firebase Realtime DB (REST) o una implementación en memoria.
- */
 public interface MainRepository {
 
     /**
-     * Obtiene una partida completa por su ID.
-     * @param gameId ID único de la partida
-     * @return CompletableFuture que resuelve a un GameDto o null si no existe
+     * Escribe múltiples rutas de forma atómica usando PATCH multi-path de Firebase.
+     * @param updates mapa de ruta → valor (ej: {"/games/123/moves/0": moveData})
+     * @param idToken token JWT obtenido del AuthService
      */
-    CompletableFuture<GameDto> getGame(String gameId);
+    void writeMovesMultiPath(Map<String, Object> updates, String idToken);
 
     /**
-     * Escribe movimientos en múltiples paths de una partida.
-     * Esto usa una petición PATCH para actualizar varias rutas a la vez.
-     *
-     * Ejemplo de payload:
-     * {
-     *   "moves": [
-     *     { "playerId": "player1", "move": "KICK", "position": {"x": 10, "y": 20} },
-     *     { "playerId": "player2", "move": "PASS", "position": {"x": 15, "y": 25} }
-     *   ],
-     *   "timestamp": 1710786000000
-     * }
-     *
-     * @param gameId ID de la partida
-     * @param payload objeto con la estructura de movimientos
-     * @return CompletableFuture que resuelve cuando se confirma la escritura
+     * Obtiene el estado de un juego.
+     * @param gameId ID del juego
+     * @param idToken token JWT
+     * @return mapa con los datos del juego
      */
-    CompletableFuture<Void> writeMoveMultiPath(String gameId, MovePayload payload);
+    Map<String, Object> getGame(String gameId, String idToken);
 
     /**
-     * Suscribe un listener a cambios en los movimientos de una partida.
-     * Se llamará cada vez que haya nuevos movimientos.
-     *
-     * @param gameId ID de la partida
-     * @param listener función que recibe el array de movimientos actualizado
-     * @return ID de la suscripción (para poder desuscribirse después)
+     * Registra un listener para cambios en tiempo real (streaming SSE).
+     * Para tests, esta interfaz permite simular listeners.
+     * @param path ruta a escuchar
+     * @param listener callback al recibir cambios
      */
-    String addMovesListener(String gameId, Consumer<java.util.List<MoveData>> listener);
+    void addMovesListener(String path, MovesListener listener);
 
-    /**
-     * Desuscribe un listener por su ID.
-     * @param gameId ID de la partida
-     * @param listenerId ID retornado por addMovesListener()
-     */
-    void removeMovesListener(String gameId, String listenerId);
-
-    String findDefaultName();
+    /** Interfaz funcional para el listener */
+    interface MovesListener {
+        void onMovesUpdated(Map<String, Object> data);
+    }
 }

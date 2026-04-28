@@ -1,95 +1,61 @@
 package es.iesquevedo.repository.firebase;
 
-import es.iesquevedo.dto.GameDto;
-import es.iesquevedo.dto.MoveData;
-import es.iesquevedo.dto.MovePayload;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 /**
  * Interfaz para el repositorio de partidas basado en Firebase Realtime Database.
  * Define contratos para obtener partidas, escribir movimientos en múltiples paths y escuchar cambios en movimientos.
  */
-public interface FirebaseGameRepository {
+
+
+ import es.iesquevedo.repository.MainRepository;
+
+ import java.util.*;
 
     /**
-     * Obtiene una partida completa por su ID desde Firebase.
-     *
-     * Ejemplo de respuesta JSON:
-     * {
-     *   "id": "game123",
-     *   "name": "Partida de Prueba",
-     *   "players": ["player1", "player2"],
-     *   "status": "IN_PROGRESS",
-     *   "createdAt": 1710786000000,
-     *   "moves": [
-     *     {
-     *       "playerId": "player1",
-     *       "move": "KICK",
-     *       "position": {"x": 10.0, "y": 20.0},
-     *       "timestamp": 1710786001000
-     *     }
-     *   ]
-     * }
-     *
-     * @param gameId ID único de la partida
-     * @return CompletableFuture que resuelve a un GameDto o null si no existe
+     * Stub para tests y desarrollo local. NO usar en producción.
+     * Simula respuestas configurables de Firebase.
      */
-    CompletableFuture<GameDto> getGame(String gameId);
+    class FirebaseMainRepositoryStub implements MainRepository {
 
-    /**
-     * Escribe movimientos en múltiples paths de una partida usando una petición PATCH atómica.
-     *
-     * Ejemplo de payload JSON enviado:
-     * {
-     *   "moves": [
-     *     {
-     *       "playerId": "player1",
-     *       "move": "KICK",
-     *       "position": {"x": 10.0, "y": 20.0},
-     *       "timestamp": 1710786001000
-     *     },
-     *     {
-     *       "playerId": "player2",
-     *       "move": "PASS",
-     *       "position": {"x": 15.0, "y": 25.0},
-     *       "timestamp": 1710786002000
-     *     }
-     *   ],
-     *   "timestamp": 1710786000000,
-     *   "gameVersion": "1710786000000"
-     * }
-     *
-     * @param gameId ID de la partida
-     * @param payload objeto con la estructura de movimientos
-     * @return CompletableFuture que resuelve cuando se confirma la escritura
-     */
-    CompletableFuture<Void> writeMoveMultiPath(String gameId, MovePayload payload);
+        private final String endpoint;
+        private final int timeout;
+        private boolean shouldReject = false;
+        private Map<String, Object> fakeGameData = new HashMap<>();
 
-    /**
-     * Suscribe un listener a cambios en los movimientos de una partida para actualizaciones en tiempo real.
-     *
-     * Ejemplo de evento JSON recibido en el listener:
-     * [
-     *   {
-     *     "playerId": "player1",
-     *     "move": "KICK",
-     *     "position": {"x": 10.0, "y": 20.0},
-     *     "timestamp": 1710786001000
-     *   },
-     *   {
-     *     "playerId": "player2",
-     *     "move": "PASS",
-     *     "position": {"x": 15.0, "y": 25.0},
-     *     "timestamp": 1710786002000
-     *   }
-     * ]
-     *
-     * @param gameId ID de la partida
-     * @param listener función que recibe la lista actualizada de movimientos
-     * @return ID de la suscripción (para poder desuscribirse después)
-     */
-    String addMovesListener(String gameId, Consumer<List<MoveData>> listener);
-}
+        public FirebaseMainRepositoryStub(String endpoint, int timeout) {
+            this.endpoint = endpoint;
+            this.timeout = timeout;
+        }
+
+        /** Configura el stub para simular rechazo (403) */
+        public void setShouldReject(boolean reject) {
+            this.shouldReject = reject;
+        }
+
+        /** Configura datos falsos que devolverá getGame */
+        public void setFakeGameData(Map<String, Object> data) {
+            this.fakeGameData = data;
+        }
+
+        @Override
+        public void writeMovesMultiPath(Map<String, Object> updates, String idToken) {
+            if (shouldReject) {
+                throw new RuntimeException("Firebase rejected: 403 Forbidden");
+            }
+            System.out.println("[STUB] writeMovesMultiPath: " + updates);
+        }
+
+        @Override
+        public Map<String, Object> getGame(String gameId, String idToken) {
+            if (shouldReject) {
+                throw new RuntimeException("Firebase rejected: 403 Forbidden");
+            }
+            return fakeGameData;
+        }
+
+        @Override
+        public void addMovesListener(String path, MovesListener listener) {
+            System.out.println("[STUB] addMovesListener en: " + path);
+            // En tests se puede llamar manualmente: listener.onMovesUpdated(data)
+        }
+    }

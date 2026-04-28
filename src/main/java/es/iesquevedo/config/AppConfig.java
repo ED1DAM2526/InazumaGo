@@ -1,41 +1,11 @@
 package es.iesquevedo.config;
 
-import es.iesquevedo.repository.MainRepository;
-import es.iesquevedo.repository.firebase.FirebaseMainRepository;
-import es.iesquevedo.repository.inmemory.InMemoryMainRepository;
 
-/**
- * Clase de configuración ligera del proyecto. Contiene fábricas estáticas para obtener
- * implementaciones de repositorios según la configuración (firebaseUrl).
- */
-public final class AppConfig {
-    private AppConfig() {
-        // Constructor privado para evitar instanciación
-    }
+public class AppConfig {
+    // Leer de application.properties o hardcodear para desarrollo
+    public static final String FIREBASE_ENDPOINT =
+            System.getProperty("firebase.endpoint", "https://tu-app.firebaseio.com");
 
-    /**
-     * Crea la implementación del repositorio principal. Si firebaseUrl es null o vacío,
-     * se devuelve una implementación en memoria (útil para pruebas locales). Si se
-     * proporciona una URL, se devuelve el repositorio orientado a Firebase.
-     */
-    public static MainRepository createMainRepository(String firebaseUrl) {
-        if (firebaseUrl == null || firebaseUrl.isBlank()) {
-            return new InMemoryMainRepository();
-        }
-        return new FirebaseMainRepository(firebaseUrl);
-    }
-
-    /**
-     * Atajo para obtener la implementación en memoria (tests).
-     */
-    public static MainRepository createInMemoryRepository() {
-        return new InMemoryMainRepository();
-    }
-
-    /**
-     * Atajo para obtener la implementación orientada a Firebase (producción).
-     */
-    public static MainRepository createFirebaseRepository(String firebaseUrl) {
-        return new FirebaseMainRepository(firebaseUrl);
-    }
+    public static final int FIREBASE_TIMEOUT =
+            Integer.parseInt(System.getProperty("firebase.timeout", "10"));
 }

@@ -1,16 +1,5 @@
 package es.iesquevedo.service.auth;
 
- E3-US2-T4
-import java.util.Optional;
-
-/**
- * Contrato minimo de autenticacion para el cliente.
- */
-public interface AuthService {
-    String login(String email, String password);
-
-    Optional<String> getToken();
-
 /**
  * Interfaz para gestión de autenticación y tokens.
  * Responsable de login y gestión de tokens para llamadas autenticadas a Firebase.
@@ -44,6 +33,4 @@ public interface AuthService {
      * @return true si hay token válido
      */
     boolean isAuthenticated();
- dev
 }
-

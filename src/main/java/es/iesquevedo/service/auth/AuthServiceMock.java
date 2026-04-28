@@ -1,5 +1,6 @@
 package es.iesquevedo.service.auth;
 
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,8 +45,8 @@ public class AuthServiceMock implements AuthService {
     }
 
     @Override
-    public String getToken() {
-        return this.currentToken;
+    public Optional<String> getToken() {
+        return Optional.ofNullable(this.currentToken);
     }
 
     @Override

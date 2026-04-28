@@ -17,4 +17,3 @@ public class ApiError {
         return code;
     }
 }
-

@@ -10,7 +10,6 @@ import es.iesquevedo.util.DateUtils;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 public class Main {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
@@ -23,7 +22,8 @@ public class Main {
 
         // Crear servicio y controlador
         var service = new MainServiceImpl(repository);
-        var mainController = new MainController(service);
+        var mainController = new MainController();
+        mainController.setService(service);
 
         // Adaptadores UI
         var ui = new UIAdapter(mainController);

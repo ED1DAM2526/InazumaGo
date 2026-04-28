@@ -13,4 +13,3 @@ public class HealthUIAdapter {
         return healthController.health();
     }
 }
-

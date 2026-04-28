@@ -1,9 +1,13 @@
 package es.iesquevedo.repository.firebase;
 
+import com.google.firebase.database.FirebaseDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 public class FirebaseMainRepositoryTest {
 
@@ -11,7 +15,9 @@ public class FirebaseMainRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = new FirebaseMainRepository("http://localhost:8080");
+        // Se inyecta un mock de FirebaseDatabase para evitar depender de una app Firebase real
+        FirebaseDatabase mockDatabase = mock(FirebaseDatabase.class);
+        repository = new FirebaseMainRepository(mockDatabase);
     }
 
     @Test

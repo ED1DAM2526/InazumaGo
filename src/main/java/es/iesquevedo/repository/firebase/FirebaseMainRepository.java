@@ -29,6 +29,11 @@ public class FirebaseMainRepository implements MainRepository {
         this.database = FirebaseDatabase.getInstance(firebaseUrl);
     }
 
+    /** Constructor para tests: permite inyectar un FirebaseDatabase mockeado. */
+    public FirebaseMainRepository(FirebaseDatabase database) {
+        this.database = database;
+    }
+
     @Override
     public CompletableFuture<GameDto> getGame(String gameId) {
         DatabaseReference ref = database.getReference("games/" + gameId);

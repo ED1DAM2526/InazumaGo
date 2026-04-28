@@ -2,7 +2,7 @@ package es.iesquevedo.repository;
 
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
-import es.iesquevedo.dto.MovePayload;
+import es.iesquevedo.dto.MoveDto;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -11,7 +11,8 @@ import java.util.function.Consumer;
 /**
  * Contrato de acceso a datos para partidas y movimientos.
  *
- * <p>Incluye operaciones CRUD minimas para {@link GameDto} y operaciones especificas
+ * <p>Define operaciones de lectura/escritura de juego y datos auxiliares.
+ * Incluye operaciones CRUD minimas para {@link GameDto} y operaciones especificas
  * para publicar/escuchar movimientos en tiempo real.</p>
  *
  * <p>Reglas generales de contrato:</p>
@@ -23,6 +24,14 @@ import java.util.function.Consumer;
  * </ul>
  */
 public interface MainRepository {
+
+    /**
+     * Lee una partida completa por su ID (operacion R de CRUD).
+     *
+     * @param gameId ID unico de la partida.
+     * @return partida encontrada o {@code null} si no existe.
+     */
+    CompletableFuture<GameDto> getGame(String gameId);
 
     /**
      * Crea una partida nueva.
@@ -46,14 +55,6 @@ public interface MainRepository {
                 new UnsupportedOperationException("listGames not implemented")
         );
     }
-
-    /**
-     * Lee una partida completa por su ID (operacion R de CRUD).
-     *
-     * @param gameId ID unico de la partida.
-     * @return partida encontrada o {@code null} si no existe.
-     */
-    CompletableFuture<GameDto> getGame(String gameId);
 
     /**
      * Actualiza una partida existente (operacion U de CRUD).
@@ -81,40 +82,22 @@ public interface MainRepository {
     }
 
     /**
-     * Escribe movimientos en múltiples paths de una partida.
-     * Esto usa una petición PATCH para actualizar varias rutas a la vez.
-     *
-     * Ejemplo de payload:
-     * {
-     *   "moves": [
-     *     { "playerId": "player1", "move": "KICK", "position": {"x": 10, "y": 20} },
-     *     { "playerId": "player2", "move": "PASS", "position": {"x": 15, "y": 25} }
-     *   ],
-     *   "timestamp": 1710786000000
-     * }
+     * Escribe movimientos en multiples paths de una partida.
      *
      * @param gameId ID de la partida.
      * @param payload objeto con la estructura de movimientos.
      * @return operacion completada cuando se confirma la escritura.
      */
-    CompletableFuture<Void> writeMoveMultiPath(String gameId, MovePayload payload);
+    CompletableFuture<Void> writeMoveMultiPath(String gameId, MoveDto payload);
 
     /**
      * Suscribe un listener a cambios en los movimientos de una partida.
-     * Se llamará cada vez que haya nuevos movimientos.
      *
      * @param gameId ID de la partida.
      * @param listener funcion que recibe el array de movimientos actualizado.
      * @return ID de la suscripcion (para poder desuscribirse despues).
      */
-    String addMovesListener(String gameId, Consumer<java.util.List<MoveData>> listener);
-
-    /**
-     * Desuscribe un listener por su ID.
-     * @param gameId ID de la partida.
-     * @param listenerId ID retornado por addMovesListener().
-     */
-    void removeMovesListener(String gameId, String listenerId);
+    String addMovesListener(String gameId, Consumer<List<MoveData>> listener);
 
     /**
      * Recupera el nombre por defecto usado por el saludo principal.
@@ -125,3 +108,4 @@ public interface MainRepository {
      */
     String findDefaultName();
 }
+

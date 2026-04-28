@@ -13,6 +13,7 @@ public class AuthServiceMock implements AuthService {
     
     private String currentToken;
     private static final String MOCK_TOKEN_PREFIX = "mock_token_";
+    private static volatile long tokenCounter = 0;
 
     public AuthServiceMock() {
         this.currentToken = null;
@@ -36,8 +37,8 @@ public class AuthServiceMock implements AuthService {
             throw new Exception("Contraseña no puede estar vacía");
         }
 
-        // En desarrollo: generar token simulado
-        this.currentToken = MOCK_TOKEN_PREFIX + System.currentTimeMillis();
+        // En desarrollo: generar token simulado con contador único
+        this.currentToken = MOCK_TOKEN_PREFIX + System.currentTimeMillis() + "_" + (++tokenCounter);
         LOGGER.log(Level.INFO, "Login exitoso para: " + email);
         LOGGER.log(Level.INFO, "Token generado: " + this.currentToken);
         
@@ -68,6 +69,15 @@ public class AuthServiceMock implements AuthService {
     public void injectToken(String token) {
         this.currentToken = token;
         LOGGER.log(Level.INFO, "Token inyectado: " + token);
+    }
+
+    /**
+     * Método auxiliar para tests: obtener token como String sin Optional.
+     * 
+     * @return token actual o null si no hay autenticación
+     */
+    public String getTokenAsString() {
+        return this.currentToken;
     }
 
     /**

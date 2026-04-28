@@ -6,15 +6,15 @@ import java.util.List;
  * Representa el payload que se envía cuando un jugador hace movimientos.
  * Se serializa a JSON para enviar a Firebase/API.
  */
-public class MovePayload {
+public class MoveDto {
     private List<MoveData> moves;
     private long timestamp;
     private String gameVersion; // para evitar conflictos de actualización
 
     // Constructores
-    public MovePayload() {}
+    public MoveDto() {}
 
-    public MovePayload(List<MoveData> moves, long timestamp) {
+    public MoveDto(List<MoveData> moves, long timestamp) {
         this.moves = moves;
         this.timestamp = timestamp;
         this.gameVersion = String.valueOf(System.currentTimeMillis());

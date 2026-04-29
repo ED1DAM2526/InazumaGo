@@ -1,5 +1,6 @@
 package es.iesquevedo.repository.firebase;
 
+import com.google.firebase.database.Query;
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
 import com.google.firebase.database.DatabaseReference;
@@ -128,7 +129,7 @@ public class GameEventRepository {
      * @param gameId ID de la partida
      * @return DatabaseReference para los eventos de la partida
      */
-    public DatabaseReference getGameEventsReference(String gameId) {
+    public Query getGameEventsReference(String gameId) {
         return database.getReference(EVENTS_PATH)
             .orderByChild("gameId")
             .equalTo(gameId);

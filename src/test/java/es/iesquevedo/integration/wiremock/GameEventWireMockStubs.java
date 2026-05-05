@@ -1,6 +1,5 @@
 package es.iesquevedo.integration.wiremock;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 /**
@@ -14,6 +13,7 @@ public class GameEventWireMockStubs {
      */
     public static void stubGameStart(String gameId) {
         stubFor(post(urlEqualTo("/api/events/game.start"))
+            .withRequestBody(containing("\"gameId\":\"" + gameId + "\""))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
@@ -25,6 +25,7 @@ public class GameEventWireMockStubs {
      */
     public static void stubGameMove(String gameId) {
         stubFor(post(urlEqualTo("/api/events/game.move"))
+            .withRequestBody(containing("\"gameId\":\"" + gameId + "\""))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
@@ -32,10 +33,23 @@ public class GameEventWireMockStubs {
     }
 
     /**
+     * Configura el stub para un movimiento rechazado por reglas de turno.
+     */
+    public static void stubGameMoveForbidden(String gameId) {
+        stubFor(post(urlEqualTo("/api/events/game.move"))
+            .withRequestBody(containing("\"gameId\":\"" + gameId + "\""))
+            .willReturn(aResponse()
+                .withStatus(403)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"error\": \"Forbidden\"}")));
+    }
+
+    /**
      * Configura el stub para evento de fin de partida
      */
     public static void stubGameEnd(String gameId) {
         stubFor(post(urlEqualTo("/api/events/game.end"))
+            .withRequestBody(containing("\"gameId\":\"" + gameId + "\""))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
@@ -49,6 +63,18 @@ public class GameEventWireMockStubs {
         stubGameStart(gameId);
         stubGameMove(gameId);
         stubGameEnd(gameId);
+    }
+
+    /**
+     * Configura un stub de recuperación de eventos para una partida concreta.
+     */
+    public static void stubRecoveredGameEvents(String gameId, String responseJson) {
+        stubFor(get(urlPathEqualTo("/api/events"))
+            .withQueryParam("gameId", equalTo(gameId))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBody(responseJson)));
     }
 
     /**
@@ -73,7 +99,7 @@ public class GameEventWireMockStubs {
      * Verifica que se haya realizado una solicitud POST con un número específico de intentos
      */
     public static void verifyEventRequest(String eventType, int times) {
-        verify(times(times), postRequestedFor(urlEqualTo("/api/events/" + eventType)));
+        verify(times, postRequestedFor(urlEqualTo("/api/events/" + eventType)));
     }
 
     /**

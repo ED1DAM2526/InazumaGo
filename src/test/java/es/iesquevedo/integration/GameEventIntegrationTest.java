@@ -1,31 +1,27 @@
 package es.iesquevedo.integration;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import com.google.firebase.database.FirebaseDatabase;
 import es.iesquevedo.dto.GameDto;
+import es.iesquevedo.dto.GameEventDto;
 import es.iesquevedo.dto.MoveData;
 import es.iesquevedo.dto.Position;
 import es.iesquevedo.integration.wiremock.GameEventWireMockStubs;
-import es.iesquevedo.repository.firebase.GameEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
+import java.util.concurrent.CompletionException;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests de integración para la sincronización de eventos de partida con Firebase y WireMock.
- * Verifica que los eventos de inicio, movimiento y fin se registren correctamente.
+ * Tests de integración para la sincronización de eventos de partida con WireMock.
  */
 class GameEventIntegrationTest {
 
@@ -34,159 +30,19 @@ class GameEventIntegrationTest {
         .options(wireMockConfig().port(8080))
         .build();
 
-    @Mock
-    private FirebaseDatabase firebaseDatabase;
-
-    private GameEventRepository gameEventRepository;
+    private es.iesquevedo.repository.firebase.GameEventRepository gameEventRepository;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        gameEventRepository = new GameEventRepository(firebaseDatabase);
+        gameEventRepository = new es.iesquevedo.repository.firebase.GameEventRepository("http://localhost:8080");
     }
 
-    /**
-     * Test: Verificar que un evento de inicio de partida se registra correctamente
-     */
     @Test
-    void testRecordGameStart_shouldSyncToFirebase() {
-        // Arrange
-        String gameId = "game123";
-        GameEventWireMockStubs.stubGameStart(gameId);
-
-        GameDto gameDto = new GameDto(
-            gameId,
-            "Final Cup",
-            Arrays.asList("Player1", "Player2"),
-            "IN_PROGRESS",
-            System.currentTimeMillis()
-        );
-
-        // Act
-        CompletableFuture<Void> result = gameEventRepository.recordGameStart(gameId, gameDto);
-
-        // Assert
-        assertNotNull(result);
-    }
-
-    /**
-     * Test: Verificar que un evento de movimiento se registra correctamente
-     */
-    @Test
-    void testRecordGameMove_shouldSyncToFirebase() {
-        // Arrange
-        String gameId = "game123";
-        GameEventWireMockStubs.stubGameMove(gameId);
-
-        Position position = new Position(5, 8);
-        MoveData moveData = new MoveData(
-            "player1",
-            "KICK",
-            position
-        );
-
-        // Act
-        CompletableFuture<Void> result = gameEventRepository.recordGameMove(gameId, moveData);
-
-        // Assert
-        assertNotNull(result);
-    }
-
-    /**
-     * Test: Verificar que un evento de fin de partida se registra correctamente
-     */
-    @Test
-    void testRecordGameEnd_shouldSyncToFirebase() {
-        // Arrange
-        String gameId = "game123";
-        GameEventWireMockStubs.stubGameEnd(gameId);
-
-        GameDto gameDto = new GameDto(
-            gameId,
-            "Final Cup",
-            Arrays.asList("Player1", "Player2"),
-            "FINISHED",
-            System.currentTimeMillis()
-        );
-
-        // Act
-        CompletableFuture<Void> result = gameEventRepository.recordGameEnd(gameId, gameDto);
-
-        // Assert
-        assertNotNull(result);
-    }
-
-    /**
-     * Test: Verificar que WireMock recibe la solicitud correctamente
-     */
-    @Test
-    void testWireMockReceivesGameStartEvent() {
-        // Arrange
-        String gameId = "game123";
-
-        stubFor(post(urlEqualTo("/api/events/game.start"))
-            .willReturn(aResponse().withStatus(200)));
-
-        // Act
-        // Simular una solicitud HTTP directamente a WireMock
-        WireMock.post(urlEqualTo("/api/events/game.start")).check(r -> {
-            assertEquals(200, r.getStatus());
-        });
-
-        // Assert
-        verify(postRequestedFor(urlEqualTo("/api/events/game.start")));
-    }
-
-    /**
-     * Test: Verificar que WireMock retorna error cuando la solicitud falla
-     */
-    @Test
-    void testWireMockReturnsErrorOnFailure() {
-        // Arrange
-        stubFor(post(urlEqualTo("/api/events/game.start"))
-            .willReturn(aResponse()
-                .withStatus(500)
-                .withBody("Internal Server Error")));
-
-        // Assert
-        verify(postRequestedFor(urlEqualTo("/api/events/game.start")).atMost(0));
-    }
-
-    /**
-     * Test: Verificar que los eventos se registran con timestamp
-     */
-    @Test
-    void testEventRecordingIncludesTimestamp() {
-        // Arrange
-        String gameId = "game123";
-        long before = System.currentTimeMillis();
-
-        GameDto gameDto = new GameDto(
-            gameId,
-            "Final Cup",
-            Arrays.asList("Player1", "Player2"),
-            "IN_PROGRESS",
-            before
-        );
-
-        GameEventWireMockStubs.stubGameStart(gameId);
-
-        // Act
-        gameEventRepository.recordGameStart(gameId, gameDto);
-
-        // Assert
-        long after = System.currentTimeMillis();
-        assertTrue(after >= before, "El timestamp debe registrarse correctamente");
-    }
-
-    /**
-     * Test: Flujo completo de eventos de partida
-     */
-    @Test
-    void testCompleteGameEventFlow() {
-        // Arrange
+    void shouldPersistStartMoveEndAndRecoverEvents() {
         String gameId = "game-complete-flow";
-        GameEventWireMockStubs.stubAllGameEvents(gameId);
+        GameEventWireMockStubs.stubGameStart(gameId);
+        GameEventWireMockStubs.stubGameMove(gameId);
+        GameEventWireMockStubs.stubGameEnd(gameId);
 
         GameDto gameStart = new GameDto(
             gameId,
@@ -195,9 +51,7 @@ class GameEventIntegrationTest {
             "IN_PROGRESS",
             System.currentTimeMillis()
         );
-
         MoveData move = new MoveData("player1", "KICK", new Position(5, 8));
-
         GameDto gameEnd = new GameDto(
             gameId,
             "Complete Flow Test",
@@ -206,19 +60,49 @@ class GameEventIntegrationTest {
             System.currentTimeMillis()
         );
 
-        // Act
-        CompletableFuture<Void> start = gameEventRepository.recordGameStart(gameId, gameStart);
-        CompletableFuture<Void> move_event = gameEventRepository.recordGameMove(gameId, move);
-        CompletableFuture<Void> end = gameEventRepository.recordGameEnd(gameId, gameEnd);
+        assertDoesNotThrow(() -> gameEventRepository.recordGameStart(gameId, gameStart).join());
+        assertDoesNotThrow(() -> gameEventRepository.recordGameMove(gameId, move).join());
+        assertDoesNotThrow(() -> gameEventRepository.recordGameEnd(gameId, gameEnd).join());
 
-        // Assert
-        assertNotNull(start);
-        assertNotNull(move_event);
-        assertNotNull(end);
+        GameEventWireMockStubs.stubRecoveredGameEvents(gameId,
+            "[" +
+                "{\"id\":\"e1\",\"type\":\"game.start\",\"gameId\":\"" + gameId + "\",\"timestamp\":1,\"payload\":{\"id\":\"" + gameId + "\"}}," +
+                "{\"id\":\"e2\",\"type\":\"game.move\",\"gameId\":\"" + gameId + "\",\"timestamp\":2,\"payload\":{\"playerId\":\"player1\",\"move\":\"KICK\"}}," +
+                "{\"id\":\"e3\",\"type\":\"game.end\",\"gameId\":\"" + gameId + "\",\"timestamp\":3,\"payload\":{\"id\":\"" + gameId + "\"}}" +
+            "]");
+
+        List<GameEventDto> events = gameEventRepository.getGameEvents(gameId).join();
+
+        assertEquals(3, events.size());
+        assertEquals("game.start", events.get(0).getType());
+        assertEquals("game.move", events.get(1).getType());
+        assertEquals("game.end", events.get(2).getType());
+        assertTrue(events.stream().allMatch(event -> gameId.equals(event.getGameId())));
     }
 
+    @Test
+    void shouldAcceptValidTurnWith200() {
+        String gameId = "game-turn-ok";
+        GameEventWireMockStubs.stubGameMove(gameId);
 
+        MoveData move = new MoveData("player1", "PASS", new Position(3, 4));
 
+        assertDoesNotThrow(() -> gameEventRepository.recordGameMove(gameId, move).join());
+        GameEventWireMockStubs.verifyEventRequest("game.move");
+    }
 
+    @Test
+    void shouldRejectInvalidTurnWith403() {
+        String gameId = "game-turn-forbidden";
+        GameEventWireMockStubs.stubGameMoveForbidden(gameId);
 
+        MoveData move = new MoveData("player2", "TACKLE", new Position(2, 6));
 
+        CompletionException exception = assertThrows(CompletionException.class,
+            () -> gameEventRepository.recordGameMove(gameId, move).join());
+
+        assertTrue(exception.getCause() != null);
+        assertTrue(exception.getCause() instanceof IllegalStateException);
+        assertTrue(exception.getCause().getMessage().contains("HTTP 403"));
+    }
+}

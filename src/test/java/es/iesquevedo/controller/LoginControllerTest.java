@@ -150,7 +150,7 @@ public class LoginControllerTest {
         authServiceMock.injectToken(customToken);
 
         // Assert
-        assertEquals(customToken, authServiceMock.getToken());
+        assertEquals(customToken, authServiceMock.getTokenAsString());
         assertTrue(authServiceMock.isAuthenticated());
     }
 
@@ -166,7 +166,7 @@ public class LoginControllerTest {
         authServiceMock.simulateExpiration();
 
         // Assert
-        assertNull(authServiceMock.getToken());
+        assertNull(authServiceMock.getTokenAsString());
         assertFalse(authServiceMock.isAuthenticated());
     }
 

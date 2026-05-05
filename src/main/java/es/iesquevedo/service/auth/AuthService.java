@@ -1,5 +1,7 @@
 package es.iesquevedo.service.auth;
 
+import java.util.Optional;
+
 /**
  * Interfaz para gestión de autenticación y tokens.
  * Responsable de login y gestión de tokens para llamadas autenticadas a Firebase.
@@ -18,9 +20,9 @@ public interface AuthService {
     /**
      * Obtiene el token actual.
      *
-     * @return token guardado en memoria, o null si no hay autenticación
+     * @return Optional con el token guardado en memoria, o vacío si no hay autenticación
      */
-    String getToken();
+    Optional<String> getToken();
 
     /**
      * Cierra la sesión y limpia el token.
@@ -34,4 +36,3 @@ public interface AuthService {
      */
     boolean isAuthenticated();
 }
-

@@ -1,13 +1,10 @@
 package es.iesquevedo;
 
-<<<<<<< E3-US3-T6
 import es.iesquevedo.config.AppConfig;
 import es.iesquevedo.service.impl.MainServiceImpl;
 import es.iesquevedo.ui.MainScreenController;
-=======
 import es.iesquevedo.controller.LoginController;
 import es.iesquevedo.service.auth.AuthServiceMock;
->>>>>>> dev
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,7 +20,6 @@ public class MainGUI extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-<<<<<<< E3-US3-T6
             // Load the new main screen FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainScreen.fxml"));
             Parent root = loader.load();
@@ -42,7 +38,7 @@ public class MainGUI extends Application {
             primaryStage.show();
 
             LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada - Pantalla principal cargada");
-=======
+            
             // Cargar FXML de Login con su controlador
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
             Parent root = (Parent) loader.load();
@@ -62,7 +58,7 @@ public class MainGUI extends Application {
             if (LOGGER.isLoggable(Level.INFO)) {
                 LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada exitosamente (Login)");
             }
->>>>>>> dev
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al iniciar la aplicación", e);
         }

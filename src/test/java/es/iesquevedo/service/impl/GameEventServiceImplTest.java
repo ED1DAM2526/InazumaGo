@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -43,7 +44,7 @@ class GameEventServiceImplTest {
      * Test: Notificar inicio de partida
      */
     @Test
-    void testNotifyGameStart_shouldCallRepository() {
+    void testNotifyGameStart_shouldCallRepository() throws Exception {
         // Arrange
         String gameId = "game123";
         GameDto gameDto = new GameDto(
@@ -62,7 +63,7 @@ class GameEventServiceImplTest {
 
         // Assert
         assertNotNull(result);
-        assertTrue(result.isDone() || !result.isDone()); // El future es válido
+        result.get(1, TimeUnit.SECONDS);
         verify(eventRepository).recordGameStart(gameId, gameDto);
     }
 
@@ -70,7 +71,7 @@ class GameEventServiceImplTest {
      * Test: Notificar movimiento
      */
     @Test
-    void testNotifyGameMove_shouldCallRepository() {
+    void testNotifyGameMove_shouldCallRepository() throws Exception {
         // Arrange
         String gameId = "game123";
         Position position = new Position(5, 8);
@@ -88,6 +89,7 @@ class GameEventServiceImplTest {
 
         // Assert
         assertNotNull(result);
+        result.get(1, TimeUnit.SECONDS);
         verify(eventRepository).recordGameMove(gameId, moveData);
     }
 
@@ -95,7 +97,7 @@ class GameEventServiceImplTest {
      * Test: Notificar fin de partida
      */
     @Test
-    void testNotifyGameEnd_shouldCallRepository() {
+    void testNotifyGameEnd_shouldCallRepository() throws Exception {
         // Arrange
         String gameId = "game123";
         GameDto gameDto = new GameDto(
@@ -114,6 +116,7 @@ class GameEventServiceImplTest {
 
         // Assert
         assertNotNull(result);
+        result.get(1, TimeUnit.SECONDS);
         verify(eventRepository).recordGameEnd(gameId, gameDto);
     }
 
@@ -153,13 +156,8 @@ class GameEventServiceImplTest {
         // Act
         CompletableFuture<Void> result = gameEventService.notifyGameStart(gameId, gameDto);
 
-        // Assert
-        assertNotNull(result);
-        // El future debería contener el error
-        result.handle((v, ex) -> {
-            assertNotNull(ex);
-            return null;
-        });
+        // Assert - El future contiene el error
+        assertThrows(RuntimeException.class, result::join);
     }
 
 }

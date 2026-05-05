@@ -41,7 +41,7 @@ class GameEventRepositoryTest {
     @BeforeEach
     void setUp() {
         gameEventRepository = new GameEventRepository(firebaseDatabase);
-        when(firebaseDatabase.getReference("game_events")).thenReturn(eventsReference);
+        lenient().when(firebaseDatabase.getReference("game_events")).thenReturn(eventsReference);
     }
 
     /**

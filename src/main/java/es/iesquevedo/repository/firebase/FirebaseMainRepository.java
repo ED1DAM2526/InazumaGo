@@ -77,7 +77,7 @@ public class FirebaseMainRepository implements MainRepository {
         ValueEventListener vel = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                GenericTypeIndicator<List<MoveData>> t = new GenericTypeIndicator<>() {
+                GenericTypeIndicator<List<MoveData>> t = new GenericTypeIndicator<List<MoveData>>() {
                 };
                 List<MoveData> moves = snapshot.getValue(t);
                 listener.accept(moves);

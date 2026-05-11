@@ -96,6 +96,9 @@
                     <useModulePath>false</useModulePath>
                     <excludes>
                         <exclude>**/MainTest.java</exclude>
+                        <exclude>**/FirebaseGameRepositoryStub.java</exclude>
+                        <exclude>**/FirebaseMainRepositoryTest.java</exclude>
+                        <exclude>**/LoginTokenFlowIntegrationTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

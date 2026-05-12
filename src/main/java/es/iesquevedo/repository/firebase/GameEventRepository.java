@@ -147,6 +147,8 @@ public class GameEventRepository {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("Hilo interrumpido al grabar evento " + eventType.getValue(), e);
+            } catch (RuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new IllegalStateException("Error al grabar evento " + eventType.getValue(), e);
             }

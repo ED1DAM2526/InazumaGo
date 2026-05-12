@@ -13,7 +13,7 @@ public class UIAdapter {
         this.mainController = mainController;
     }
 
-    public String greet() {
-        return mainController.greet();
+    public String status() {
+        return mainController.status();
     }
 }

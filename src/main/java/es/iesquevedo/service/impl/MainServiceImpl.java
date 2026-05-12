@@ -12,7 +12,7 @@ public class MainServiceImpl implements MainService {
     }
 
     @Override
-    public String greet() {
+    public String status() {
         String name = repository.findDefaultName();
         // Evita NPE si el repositorio devuelve null
         return "Hello, " + Objects.toString(name, "player") + "!";

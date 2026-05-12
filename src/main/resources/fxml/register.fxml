@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="es.iesquevedo.ui.RegisterController"
+      spacing="15" style="-fx-padding: 30; -fx-alignment: center;">
+
+    <Label text="InazumaGo — Crear Cuenta" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+    <TextField fx:id="emailField" promptText="Email"/>
+    <PasswordField fx:id="passwordField" promptText="Contraseña"/>
+    <PasswordField fx:id="confirmPasswordField" promptText="Confirmar contraseña"/>
+
+    <Label text="La contraseña debe tener al menos 6 caracteres"
+           style="-fx-font-size: 11px; -fx-text-fill: gray;"/>
+
+    <HBox spacing="10" style="-fx-alignment: center;">
+        <Button text="Crear cuenta" onAction="#handleRegistro" style="-fx-min-width: 120px;"/>
+        <Button text="Cancelar" onAction="#handleCancelar" style="-fx-min-width: 120px; -fx-background-color: #cccccc;"/>
+    </HBox>
+
+    <Label fx:id="mensajeLabel" text="" style="-fx-text-fill: red; -fx-wrap-text: true;"/>
+</VBox>
+

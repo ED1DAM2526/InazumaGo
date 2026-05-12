@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="es.iesquevedo.controller.MainController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="es.iesquevedo.ui.MainFXController"
+      spacing="20" style="-fx-padding: 40; -fx-alignment: center;">
 
-    <Label fx:id="salutoLabel" text="Cargando..." style="-fx-font-size: 18;"/>
+    <Label fx:id="saludoLabel" text="Cargando..." style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+    <Label fx:id="tokenLabel" text="" style="-fx-font-size: 12px; -fx-text-fill: gray;"/>
+
+    <Button text="Cerrar sesión" onAction="#handleLogout" style="-fx-min-width: 120px;"/>
 </VBox>
+

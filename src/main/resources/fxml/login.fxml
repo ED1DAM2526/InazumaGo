@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="es.iesquevedo.ui.LoginController"
+      spacing="15" style="-fx-padding: 30; -fx-alignment: center;">
+
+    <Label text="InazumaGo — Login" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+    <TextField fx:id="emailField" promptText="Email"/>
+    <PasswordField fx:id="passwordField" promptText="Contraseña"/>
+
+    <Button text="Entrar" onAction="#handleLogin" style="-fx-min-width: 120px;"/>
+
+    <HBox spacing="10" style="-fx-alignment: center;">
+        <Button text="Crear cuenta" onAction="#handleCrearCuenta" style="-fx-min-width: 120px; -fx-background-color: #cccccc;"/>
+    </HBox>
+
+    <Label fx:id="mensajeLabel" text="" style="-fx-text-fill: red;"/>
+</VBox>

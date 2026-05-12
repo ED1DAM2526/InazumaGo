@@ -86,5 +86,10 @@ public class AppState {
         this.currentUserEmail = null;
         LOGGER.log(Level.INFO, "AppState limpiado (logout)");
     }
+
+    public void saveToken(String token, String mail) {
+    }
+
+
 }
 

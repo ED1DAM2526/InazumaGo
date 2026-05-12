@@ -119,12 +119,12 @@ public class LoginController {
             GameController gameController = gameLoader.getController();
             gameController.setPlayerNames(playerName, "Oponente");
             gameController.setInitialScores(0, 0);
-
+            
             Scene scene = emailField.getScene();
             scene.setRoot(gameRoot);
             javafx.stage.Stage stage = (javafx.stage.Stage) scene.getWindow();
             stage.setTitle("InazumaGo - Partida");
-
+            
             LOGGER.log(Level.INFO, "Navegado a pantalla de juego para: " + playerName);
         } catch (Exception e) {
             updateStatus("✗ Error al cargar pantalla de juego: " + e.getMessage(), "error");

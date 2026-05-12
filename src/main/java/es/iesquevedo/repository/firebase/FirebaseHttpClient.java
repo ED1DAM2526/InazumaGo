@@ -5,6 +5,7 @@ import es.iesquevedo.service.auth.AuthService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -22,12 +23,14 @@ public class FirebaseHttpClient {
 
     public HttpResponse<String> get(String path) throws IOException {
         URL url = new URL(baseUrl + path);
-        URLConnection connection = url.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
 
         if (authService.getToken().isPresent()) {
             connection.setRequestProperty("Authorization", "Bearer " + authService.getToken().get());
         }
 
+        int statusCode = connection.getResponseCode();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         StringBuilder response = new StringBuilder();
         String line;
@@ -35,8 +38,9 @@ public class FirebaseHttpClient {
             response.append(line);
         }
         reader.close();
+        connection.disconnect();
 
-        return new HttpResponse<>(response.toString());
+        return new HttpResponse<>(response.toString(), statusCode);
     }
 
     /**
@@ -44,13 +48,24 @@ public class FirebaseHttpClient {
      */
     public static class HttpResponse<T> {
         private final T body;
+        private final int statusCode;
 
         public HttpResponse(T body) {
             this.body = body;
+            this.statusCode = 200; // Default
+        }
+
+        public HttpResponse(T body, int statusCode) {
+            this.body = body;
+            this.statusCode = statusCode;
         }
 
         public T body() {
             return body;
+        }
+
+        public int statusCode() {
+            return statusCode;
         }
     }
 }

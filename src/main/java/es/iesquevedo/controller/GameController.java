@@ -13,8 +13,8 @@ import java.util.logging.Logger;
 
 public class GameController {
     private static final Logger LOGGER = Logger.getLogger(GameController.class.getName());
-    private static final int BOARD_SIZE = 19;
-    private static final int CELL_SIZE = 25;
+    private static final int BOARD_SIZE = 9;
+    private static final int CELL_SIZE = 50;
 
     @FXML private Label player1NameLabel;
     @FXML private Label player1ScoreLabel;
@@ -103,19 +103,48 @@ public class GameController {
         double x = CELL_SIZE / 2 + col * CELL_SIZE;
         double y = CELL_SIZE / 2 + row * CELL_SIZE;
         double radius = CELL_SIZE / 2 - 2;
-
+        
         if (stone == Stone.BLACK) {
+            // Sombra
+            gc.setFill(Color.color(0, 0, 0, 0.3));
+            gc.fillOval(x - radius + 2, y - radius + 3, radius * 2, radius * 2);
+            
+            // Base oscura
+            gc.setFill(Color.color(0.2, 0.2, 0.2, 1.0));
+            gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
+            
+            // Superficie negra principal
             gc.setFill(Color.BLACK);
+            gc.fillOval(x - radius + 1, y - radius + 1, radius * 2 - 2, radius * 2 - 2);
+            
+            // Destello/brillo
+            double shine_x = x - radius + radius * 0.3;
+            double shine_y = y - radius + radius * 0.3;
+            gc.setFill(Color.color(0.3, 0.3, 0.3, 0.4));
+            gc.fillOval(shine_x, shine_y, radius * 0.8, radius * 0.8);
         } else {
+            // Sombra para piedra blanca
+            gc.setFill(Color.color(0, 0, 0, 0.2));
+            gc.fillOval(x - radius + 2, y - radius + 3, radius * 2, radius * 2);
+            
+            // Base gris claro
+            gc.setFill(Color.color(0.95, 0.95, 0.95, 1.0));
+            gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
+            
+            // Superficie blanca
             gc.setFill(Color.WHITE);
-            gc.setStroke(Color.BLACK);
-            gc.setLineWidth(2);
-        }
-
-        gc.fillOval(x - radius, y - radius, radius * 2, radius * 2);
-
-        if (stone == Stone.WHITE) {
-            gc.strokeOval(x - radius, y - radius, radius * 2, radius * 2);
+            gc.fillOval(x - radius + 1, y - radius + 1, radius * 2 - 2, radius * 2 - 2);
+            
+            // Borde gris oscuro
+            gc.setStroke(Color.color(0.7, 0.7, 0.7, 1.0));
+            gc.setLineWidth(1.5);
+            gc.strokeOval(x - radius + 1, y - radius + 1, radius * 2 - 2, radius * 2 - 2);
+            
+            // Destello/brillo en la piedra blanca
+            double shine_x = x - radius + radius * 0.35;
+            double shine_y = y - radius + radius * 0.35;
+            gc.setFill(Color.color(1.0, 1.0, 1.0, 0.6));
+            gc.fillOval(shine_x, shine_y, radius * 0.7, radius * 0.7);
         }
     }
 
@@ -261,5 +290,6 @@ public class GameController {
         }
     }
 }
+
 
 

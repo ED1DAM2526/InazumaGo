@@ -4,6 +4,7 @@ import es.iesquevedo.exception.NotFoundException;
 import es.iesquevedo.repository.MainRepository;
 import es.iesquevedo.repository.inmemory.InMemoryMainRepository;
 import es.iesquevedo.service.impl.MainServiceImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -19,40 +20,47 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @DisplayName("Pruebas unitarias de MainServiceImpl")
-public class MainServiceTest {
+class MainServiceTest {
 
-    private MainService service;
-    private MainRepository repository;
+    private MainService mainService;
+    private AutoCloseable closeable;
 
     @Mock
     private MainRepository mockRepository;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        repository = new InMemoryMainRepository();
-        service = new MainServiceImpl(repository);
+        closeable = MockitoAnnotations.openMocks(this);
+        MainRepository repository = new InMemoryMainRepository();
+        mainService = new MainServiceImpl(repository);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        if (closeable != null) {
+            closeable.close();
+        }
     }
 
     @DisplayName("Debe retornar saludo con nombre por defecto")
     @Test
     void testGreetReturnsHelloWithDefaultName() {
-        String greeting = service.greet();
+        String greeting = mainService.greet();
         assertEquals("Hello, InazumaGoPrevio!", greeting);
     }
 
     @DisplayName("Debe lanzar NotFoundException cuando falta el nombre por defecto")
     @Test
-    public void greet_shouldThrowNotFound_whenDefaultNameIsMissing() {
+    void greet_shouldThrowNotFound_whenDefaultNameIsMissing() {
         MainRepository repo = new InMemoryMainRepository() {
             @Override
             public String findDefaultName() {
                 return null;
             }
         };
-        MainService service = new MainServiceImpl(repo);
+        MainService testService = new MainServiceImpl(repo);
 
-        NotFoundException exception = assertThrows(NotFoundException.class, service::greet);
+        NotFoundException exception = assertThrows(NotFoundException.class, testService::greet);
 
         assertEquals("Default player name not found", exception.getMessage());
     }
@@ -60,14 +68,14 @@ public class MainServiceTest {
     @DisplayName("El saludo no debe ser nulo")
     @Test
     void testGreetNotNull() {
-        String greeting = service.greet();
+        String greeting = mainService.greet();
         assertNotNull(greeting);
     }
 
     @DisplayName("El saludo debe contener 'Hello'")
     @Test
     void testGreetContainsHello() {
-        String greeting = service.greet();
+        String greeting = mainService.greet();
         assertTrue(greeting.contains("Hello"));
     }
 

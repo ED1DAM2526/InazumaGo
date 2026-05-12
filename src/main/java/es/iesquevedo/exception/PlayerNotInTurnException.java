@@ -12,4 +12,3 @@ public class PlayerNotInTurnException extends RuntimeException {
         super(message, cause);
     }
 }
-

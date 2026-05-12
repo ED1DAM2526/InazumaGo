@@ -12,4 +12,3 @@ public class InvalidMoveException extends RuntimeException {
         super(message, cause);
     }
 }
-

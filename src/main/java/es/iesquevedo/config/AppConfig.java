@@ -27,7 +27,7 @@ public final class AppConfig {
      * proporciona una URL, se devuelve el repositorio orientado a Firebase.
      */
     public static MainRepository createMainRepository(String firebaseUrl) {
-        if (firebaseUrl == null || firebaseUrl.isBlank()) {
+        if (firebaseUrl == null || firebaseUrl.trim().isEmpty()) {
             return new InMemoryMainRepository();
         }
         return new FirebaseMainRepository(firebaseUrl);

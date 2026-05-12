@@ -3,6 +3,9 @@ package es.iesquevedo.controller;
 import es.iesquevedo.config.AppState;
 import es.iesquevedo.service.auth.AuthService;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -94,12 +97,38 @@ public class LoginController {
             emailField.clear();
             passwordField.clear();
 
-            // Nota: En una app real aquí navegerías a la pantalla principal
-            // Por ahora solo mostramos el mensaje de éxito
+            // Navegar a la pantalla de juego
+            navigateToGame(email);
 
         } catch (Exception e) {
             updateStatus("✗ Error de login: " + e.getMessage(), "error");
             LOGGER.log(Level.WARNING, "Error en login: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Navega a la pantalla de juego después del login exitoso.
+     *
+     * @param playerName nombre del jugador autenticado
+     */
+    private void navigateToGame(String playerName) {
+        try {
+            FXMLLoader gameLoader = new FXMLLoader(getClass().getResource("/fxml/Game.fxml"));
+            Parent gameRoot = gameLoader.load();
+
+            GameController gameController = gameLoader.getController();
+            gameController.setPlayerNames(playerName, "Oponente");
+            gameController.setInitialScores(0, 0);
+            
+            Scene scene = emailField.getScene();
+            scene.setRoot(gameRoot);
+            javafx.stage.Stage stage = (javafx.stage.Stage) scene.getWindow();
+            stage.setTitle("InazumaGo - Partida");
+            
+            LOGGER.log(Level.INFO, "Navegado a pantalla de juego para: " + playerName);
+        } catch (Exception e) {
+            updateStatus("✗ Error al cargar pantalla de juego: " + e.getMessage(), "error");
+            LOGGER.log(Level.SEVERE, "Error al cargar Game.fxml: " + e.getMessage());
         }
     }
 

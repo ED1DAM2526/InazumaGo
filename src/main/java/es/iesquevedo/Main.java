@@ -3,6 +3,7 @@ package es.iesquevedo;
 import es.iesquevedo.config.AppConfig;
 import es.iesquevedo.controller.HealthController;
 import es.iesquevedo.controller.MainController;
+import es.iesquevedo.repository.MainRepository;
 import es.iesquevedo.service.impl.MainServiceImpl;
 import es.iesquevedo.ui.HealthUIAdapter;
 import es.iesquevedo.ui.UIAdapter;
@@ -18,17 +19,17 @@ public class Main {
         String firebaseUrl = System.getenv("FIREBASE_URL");
 
         // Crear repositorio (Firebase si FIREBASE_URL está definido, sino InMemory)
-        var repository = AppConfig.createMainRepository(firebaseUrl);
+        MainRepository repository = AppConfig.createMainRepository(firebaseUrl);
 
         // Crear servicio y controlador
-        var service = new MainServiceImpl(repository);
-        var mainController = new MainController();
+        MainServiceImpl service = new MainServiceImpl(repository);
+        MainController mainController = new MainController();
         mainController.setService(service);
 
         // Adaptadores UI
-        var ui = new UIAdapter(mainController);
-        var healthController = new HealthController();
-        var healthUi = new HealthUIAdapter(healthController);
+        UIAdapter ui = new UIAdapter(mainController);
+        HealthController healthController = new HealthController();
+        HealthUIAdapter healthUi = new HealthUIAdapter(healthController);
 
         // Uso simple: saludar y comprobar estado
         // Comprobar explícitamente si el nivel está habilitado y usar el formateo incorporado

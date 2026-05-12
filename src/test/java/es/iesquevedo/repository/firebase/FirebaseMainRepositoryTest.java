@@ -4,6 +4,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +23,8 @@ public class FirebaseMainRepositoryTest {
 
     @Test
     void testPatchMultiPathSuccess() throws Exception {
-        Map<String, Object> updates = Map.of("meta/turn", 2);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("meta/turn", 2);
         boolean result = repository.patchMultiPath("games/test", updates);
         assertTrue(result);
     }

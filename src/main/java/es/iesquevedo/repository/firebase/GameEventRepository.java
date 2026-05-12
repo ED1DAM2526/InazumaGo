@@ -248,7 +248,7 @@ public class GameEventRepository {
 
     private String normalizeBaseUrl(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("La base URL no puede ser nula o vacía");
+            throw new IllegalArgumentException("La base URL no puede ser nula o vacía ");
         }
         return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
     }

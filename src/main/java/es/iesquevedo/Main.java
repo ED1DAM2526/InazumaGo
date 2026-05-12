@@ -1,35 +1,40 @@
 package es.iesquevedo;
 
-import es.iesquevedo.service.auth.AuthService;
-import es.iesquevedo.service.auth.impl.AuthServiceMock;
-import es.iesquevedo.ui.LoginController;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import es.iesquevedo.config.AppConfig;
+import es.iesquevedo.controller.HealthController;
+import es.iesquevedo.controller.MainController;
+import es.iesquevedo.service.impl.MainServiceImpl;
+import es.iesquevedo.ui.HealthUIAdapter;
+import es.iesquevedo.ui.UIAdapter;
+import es.iesquevedo.util.DateUtils;
 
-public class Main extends Application {
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        // Crear el AuthService (mock para desarrollo)
-        AuthService authService = new AuthServiceMock();
-
-        // Cargar la pantalla de login
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/fxml/login.fxml")
-        );
-        primaryStage.setScene(new Scene(loader.load(), 350, 250));
-        primaryStage.setTitle("InazumaGo — Login");
-
-        // Inyectar el AuthService en el controlador
-        LoginController loginCtrl = loader.getController();
-        loginCtrl.setAuthService(authService);
-
-        primaryStage.show();
-    }
+import java.util.logging.Level;
+import java.util.logging.Logger;
+public class Main {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
-        launch(args);
+        // Configuración mínima: preferir URL de Firebase desde la variable de entorno FIREBASE_URL
+        String firebaseUrl = System.getenv("FIREBASE_URL");
+
+        // Crear repositorio (Firebase si FIREBASE_URL está definido, sino InMemory)
+        var repository = AppConfig.createMainRepository(firebaseUrl);
+
+        // Crear servicio y controlador
+        var service = new MainServiceImpl(repository);
+        var mainController = new MainController();
+        mainController.setService(service);
+
+        // Adaptadores UI
+        var ui = new UIAdapter(mainController);
+        var healthController = new HealthController();
+        var healthUi = new HealthUIAdapter(healthController);
+
+        // Uso simple: saludar y comprobar estado
+        // Comprobar explícitamente si el nivel está habilitado y usar el formateo incorporado
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.log(Level.INFO, "{0} {1}", new Object[]{DateUtils.nowIso(), ui.greet()});
+            LOGGER.log(Level.INFO, "{0} Health: {1}", new Object[]{DateUtils.nowIso(), healthUi.health()});
+        }
     }
 }

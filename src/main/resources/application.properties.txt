@@ -1,0 +1,5 @@
+# Aplicación: InazumaGoPrevio
+# Propiedades de ejemplo
+app.name=InazumaGoPrevio
+app.environment=development
+

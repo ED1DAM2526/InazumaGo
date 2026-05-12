@@ -1,30 +1,38 @@
 package es.iesquevedo.service.auth;
 
+import java.util.Optional;
+
+/**
+ * Interfaz para gestión de autenticación y tokens.
+ * Responsable de login y gestión de tokens para llamadas autenticadas a Firebase.
+ */
 public interface AuthService {
     /**
-     * Autentica un usuario con email y contraseña.
-     * @param email Email del usuario
-     * @param password Contraseña del usuario
-     * @return Token de autenticación si es exitoso, null en caso contrario
+     * Realiza login con email y contraseña.
+     *
+     * @param email correo del usuario
+     * @param password contraseña del usuario
+     * @return token de autenticación
+     * @throws Exception si el login falla
      */
-    String login(String email, String password);
+    String login(String email, String password) throws Exception;
 
     /**
-     * Registra un nuevo usuario con email y contraseña.
-     * @param email Email del nuevo usuario
-     * @param password Contraseña del nuevo usuario
-     * @return Token de autenticación si es exitoso, null en caso contrario
+     * Obtiene el token actual.
+     *
+     * @return Optional con el token guardado en memoria, o vacío si no hay autenticación
      */
-    String register(String email, String password);
+    Optional<String> getToken();
 
     /**
-     * Obtiene el token de autenticación actual.
-     * @return Token actual o null si no hay sesión activa
-     */
-    String getToken();
-
-    /**
-     * Cierra la sesión actual.
+     * Cierra la sesión y limpia el token.
      */
     void logout();
+
+    /**
+     * Verifica si la sesión está activa.
+     *
+     * @return true si hay token válido
+     */
+    boolean isAuthenticated();
 }

@@ -32,6 +32,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class GameEventRepository {
     private static final String EVENTS_PATH = "game_events";
+    private static final String FIELD_GAME_ID = "gameId";
 
     private final FirebaseDatabase database;
     private final String baseUrl;
@@ -114,7 +115,7 @@ public class GameEventRepository {
             throw new IllegalStateException("getGameEventsReference solo está disponible en modo Firebase SDK");
         }
         return database.getReference(EVENTS_PATH)
-            .orderByChild("gameId")
+            .orderByChild(FIELD_GAME_ID)
             .equalTo(gameId);
     }
 
@@ -143,10 +144,11 @@ public class GameEventRepository {
                     "Error al grabar evento " + eventType.getValue() +
                         " (HTTP " + response.statusCode() + "): " + response.body()
                 );
-            } catch (RuntimeException e) {
-                throw e;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Hilo interrumpido al grabar evento " + eventType.getValue(), e);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Error al grabar evento " + eventType.getValue(), e);
             }
         });
     }
@@ -188,10 +190,13 @@ public class GameEventRepository {
                 throw new IllegalStateException(
                     "Error al recuperar eventos (HTTP " + response.statusCode() + "): " + response.body()
                 );
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Hilo interrumpido al recuperar eventos", e);
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Error al recuperar eventos", e);
             }
         });
     }
@@ -200,7 +205,7 @@ public class GameEventRepository {
         CompletableFuture<List<GameEventDto>> future = new CompletableFuture<>();
         try {
             Query query = database.getReference(EVENTS_PATH)
-                .orderByChild("gameId")
+                .orderByChild(FIELD_GAME_ID)
                 .equalTo(gameId);
 
             query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -233,7 +238,7 @@ public class GameEventRepository {
     private Map<String, Object> buildEventData(EventType eventType, String gameId, Object payload) {
         Map<String, Object> eventData = new HashMap<>();
         eventData.put("type", eventType.getValue());
-        eventData.put("gameId", gameId);
+        eventData.put(FIELD_GAME_ID, gameId);
         eventData.put("timestamp", System.currentTimeMillis());
         eventData.put("payload", payload);
         return eventData;

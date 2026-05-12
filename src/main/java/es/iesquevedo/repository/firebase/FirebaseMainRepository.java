@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import es.iesquevedo.dto.GameDto;
 import es.iesquevedo.dto.MoveData;
-import es.iesquevedo.dto.MovePayload;
+import es.iesquevedo.dto.MoveDto;
 import es.iesquevedo.repository.MainRepository;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -264,7 +264,7 @@ public class FirebaseMainRepository implements MainRepository {
     }
 
     @Override
-    public CompletableFuture<Void> writeMoveMultiPath(String gameId, MovePayload payload) {
+    public CompletableFuture<Void> writeMoveMultiPath(String gameId, MoveDto payload) {
         return CompletableFuture.runAsync(() -> {
             try {
                 // Construir URL para PATCH multi-path
@@ -313,7 +313,6 @@ public class FirebaseMainRepository implements MainRepository {
         return listenerId;
     }
 
-    @Override
     public void removeMovesListener(String gameId, String listenerId) {
         movesListeners.remove(listenerId);
         LOGGER.log(Level.INFO, "Listener removido: " + listenerId);

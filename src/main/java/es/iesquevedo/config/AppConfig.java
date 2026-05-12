@@ -22,7 +22,7 @@ public final class AppConfig {
         if (firebaseUrl == null || firebaseUrl.isBlank()) {
             return new InMemoryMainRepository();
         }
-        return new FirebaseMainRepository(firebaseUrl);
+        return new FirebaseMainRepository(firebaseUrl, 30);
     }
 
     /**
@@ -36,6 +36,13 @@ public final class AppConfig {
      * Atajo para obtener la implementación orientada a Firebase (producción).
      */
     public static MainRepository createFirebaseRepository(String firebaseUrl) {
-        return new FirebaseMainRepository(firebaseUrl);
+        return new FirebaseMainRepository(firebaseUrl, 30);
+    }
+
+    /**
+     * Crea repositorio Firebase con timeout personalizado.
+     */
+    public static FirebaseMainRepository createFirebaseRepository(String firebaseUrl, int timeoutSeconds) {
+        return new FirebaseMainRepository(firebaseUrl, timeoutSeconds);
     }
 }

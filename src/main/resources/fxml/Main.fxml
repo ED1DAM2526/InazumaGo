@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx"
@@ -11,4 +13,11 @@
     </padding>
 
     <Label fx:id="salutoLabel" text="Cargando..." style="-fx-font-size: 18;"/>
+
+    <!-- Tablero y fichas superpuestas -->
+    <StackPane>
+        <ImageView fx:id="gameBoardImageView" fitWidth="400" fitHeight="360" preserveRatio="true"/>
+        <ImageView fx:id="blackStoneImageView" pickOnBounds="false" />
+        <ImageView fx:id="whiteStoneImageView" pickOnBounds="false" />
+    </StackPane>
 </VBox>

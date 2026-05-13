@@ -43,7 +43,7 @@ public class MainApp {
         MainServiceImpl service = new MainServiceImpl(repository);
         MainController mainController = new MainController();
         mainController.setService(service);
-//error, eliminar comentario
+//error, eliminar este comentario
         // Adaptadores UI
         UIAdapter ui = new UIAdapter(mainController);
         HealthController healthController = new HealthController();

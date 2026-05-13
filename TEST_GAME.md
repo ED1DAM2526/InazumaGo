@@ -150,9 +150,9 @@ Tras login exitoso, verás la nueva vista de partida con:
 
 ## Notas Técnicas
 
-- **Framework**: JavaFX 12.0.1
-- **Compilador**: Eclipse Compiler (ecj) para Java 8
-- **Versión Java**: 8 (compilado y compatible)
+- **Framework**: JavaFX 21.0.2
+- **Compilador**: Maven Compiler Plugin 3.13.0 con `javac`
+- **Versión Java**: 21 (LTS)
 - **Patrón de Diseño**: MVC (Model-View-Controller)
 - **Threading**: AnimationTimer para actualización de UI en tiempo real
 

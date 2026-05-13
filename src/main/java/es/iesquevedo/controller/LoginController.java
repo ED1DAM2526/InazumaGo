@@ -13,6 +13,7 @@ import javafx.scene.paint.Color;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import es.iesquevedo.util.EmailUtils;
 
 /**
  * Controlador para la pantalla de login.
@@ -66,6 +67,13 @@ public class LoginController {
         if (email == null || email.trim().isEmpty()) {
             updateStatus("El email no puede estar vacío", "error");
             LOGGER.log(Level.WARNING, "Intento de login sin email");
+            return;
+        }
+
+        // Validar formato de email (asegura que contenga '@' y estructura básica)
+        if (!EmailUtils.isValidEmail(email)) {
+            updateStatus("El email no tiene un formato válido. Ej: usuario@ejemplo.com", "error");
+            LOGGER.log(Level.WARNING, "Intento de login con email inválido: " + email);
             return;
         }
 
@@ -162,5 +170,7 @@ public class LoginController {
             statusLabel.setTextFill(Color.BLACK);
         }
     }
+
+    // ...existing code...
 }
 

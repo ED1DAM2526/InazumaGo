@@ -4,6 +4,7 @@ import es.iesquevedo.exception.InvalidMoveException;
 import es.iesquevedo.exception.PlayerNotInTurnException;
 import es.iesquevedo.model.Game;
 import es.iesquevedo.model.GameState;
+import es.iesquevedo.model.Move;
 import es.iesquevedo.model.Player;
 import es.iesquevedo.service.impl.GameServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,8 +103,9 @@ public class GameServiceTest {
         final Game startedGame = gameService.startGame(game.getId());
 
         // Intenta mover con player2 pero es turno de player1
+        Move move = new Move(player2.getId(), 0, 0);
         assertThrows(PlayerNotInTurnException.class, 
-            () -> gameService.executeMove(startedGame.getId(), player2.getId(), null));
+            () -> gameService.executeMove(startedGame.getId(), player2.getId(), move));
     }
 
     @Test
@@ -115,8 +117,9 @@ public class GameServiceTest {
         // Marca player1 como muerto
         startedGame.getCurrentPlayer().setAlive(false);
 
+        Move move = new Move(player1.getId(), 0, 0);
         assertThrows(InvalidMoveException.class, 
-            () -> gameService.executeMove(startedGame.getId(), player1.getId(), null));
+            () -> gameService.executeMove(startedGame.getId(), player1.getId(), move));
     }
 
     @Test

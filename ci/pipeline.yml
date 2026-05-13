@@ -13,11 +13,12 @@ jobs:
     image: eclipse-temurin:21
     steps:
       - checkout
+      - run: java -version
       - restore_cache:
           key: maven-cache
           paths:
             - ~/.m2/repository
-      - run: ./mvnw -B -DskipTests=false test
+      - run: ./mvnw -B clean test
       - save_cache:
           key: maven-cache
           paths:

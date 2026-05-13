@@ -56,6 +56,21 @@ public class FirebaseGameRepositoryStub implements MainRepository {
     }
 
     @Override
+    public CompletableFuture<Void> updateGame(String gameId, GameDto updated) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(timeout); // Simula timeout
+                if (endpoint.contains("error") || (gameId != null && gameId.contains("invalid"))) {
+                    throw new RuntimeException("Simulated 403: Invalid game or endpoint error");
+                }
+                // Simula respuesta 200: éxito
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Simulated timeout");
+            }
+        });
+    }
+
+    @Override
     public String addMovesListener(String gameId, Consumer<List<MoveData>> listener) {
         // Simula listener: dispara un evento falso después de un delay simulado usando timeout
         String listenerId = "listener-" + gameId + "-" + System.currentTimeMillis();

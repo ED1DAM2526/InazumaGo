@@ -90,6 +90,26 @@ public class InMemoryMainRepository implements MainRepository {
     }
 
     @Override
+    public CompletableFuture<Void> updateGame(String gameId, GameDto updated) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(simulatedLatencyMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            gamesStore.computeIfPresent(gameId, (id, existingGame) -> {
+                existingGame.setName(updated.getName());
+                existingGame.setPlayers(updated.getPlayers());
+                existingGame.setStatus(updated.getStatus());
+                existingGame.setCreatedAt(updated.getCreatedAt());
+                existingGame.setMoves(updated.getMoves());
+                return existingGame;
+            });
+        });
+    }
+
+    @Override
     public String addMovesListener(String gameId, Consumer<List<MoveData>> listener) {
         String listenerId = "listener-" + (++listenerIdCounter);
 
@@ -119,6 +139,6 @@ public class InMemoryMainRepository implements MainRepository {
 
     @Override
     public String findDefaultName() {
-        return "InazumaGoPrevio!";
+        return "InazumaGoPrevio";
     }
 }

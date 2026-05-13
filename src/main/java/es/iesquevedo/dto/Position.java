@@ -1,26 +1,28 @@
 package es.iesquevedo.dto;
 
 public class Position {
-    private double x;
-    private double y;
+    private final int row;
+    private final int col;
 
-    // Constructores
-    public Position() {}
-
-    public Position(double x, double y) {
-        this.x = x;
-        this.y = y;
+    public Position(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 
-    // Getters y Setters
-    public double getX() { return x; }
-    public void setX(double x) { this.x = x; }
+    public int getRow() {
+        return row;
+    }
 
-    public double getY() { return y; }
-    public void setY(double y) { this.y = y; }
+    public int getCol() {
+        return col;
+    }
 
-    @Override
-    public String toString() {
-        return "Position{" + "x=" + x + ", y=" + y + '}';
+    // Compatibilidad: algunos mappers esperan getX/getY
+    public int getX() {
+        return row;
+    }
+
+    public int getY() {
+        return col;
     }
 }

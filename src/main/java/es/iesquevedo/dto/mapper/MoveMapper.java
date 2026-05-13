@@ -13,9 +13,11 @@ public class MoveMapper {
     
     public static MoveDto toDto(Move move) {
         MoveDto dto = new MoveDto();
-        dto.setTimestamp(move.getClientTimestamp());
-        dto.setGameVersion(move.getMoveId());
-        
+        // Move no expone timestamp ni id en el dominio actual, así que usamos el timestamp de envío
+        dto.setTimestamp(System.currentTimeMillis());
+        // gameVersion lo deja vacío; el repositorio puede rellenarlo si hace falta
+        dto.setGameVersion(null);
+
         if (!move.isPass()) {
             MoveData moveData = new MoveData(
                 move.getActor().name(),
@@ -36,15 +38,9 @@ public class MoveMapper {
         MoveData moveData = dto.getMoves().get(0);
         Position pos = moveData.getPosition();
         es.iesquevedo.model.board.Position position = 
-            es.iesquevedo.model.board.Position.of(pos.getX(), pos.getY());
-        
-        return Move.of(
-            dto.getGameVersion(),
-            position,
-            actor,
-            dto.getTimestamp(),
-            clientNonce
-        );
+            es.iesquevedo.model.board.Position.of(pos.getRow(), pos.getCol());
+
+        // Construimos la entidad Move usando el constructor público disponible
+        return new Move(position, actor, clientNonce);
     }
 }
-

@@ -9,6 +9,7 @@ public class GameDto {
     private String status; // "WAITING", "IN_PROGRESS", "FINISHED"
     private long createdAt;
     private List<MoveData> moves;
+    private String gameVersion; // versión para optimistic locking
 
     // Constructores
     public GameDto() {}
@@ -39,5 +40,8 @@ public class GameDto {
 
     public List<MoveData> getMoves() { return moves; }
     public void setMoves(List<MoveData> moves) { this.moves = moves; }
+
+    public String getGameVersion() { return gameVersion; }
+    public void setGameVersion(String gameVersion) { this.gameVersion = gameVersion; }
 
 }

@@ -14,6 +14,7 @@ public class MoveResult {
     private final String rejectReason;
     private final List<Group> capturedGroups;
     private final int capturedStoneCount;
+    private final boolean captured;
 
     public MoveResult(Move move, List<Group> capturedGroups) {
         this.move = Objects.requireNonNull(move);
@@ -23,6 +24,7 @@ public class MoveResult {
         this.capturedStoneCount = capturedGroups.stream()
             .mapToInt(g -> g.getSize())
             .sum();
+        this.captured = !capturedGroups.isEmpty();
     }
 
     public MoveResult(Move move, String rejectReason) {
@@ -31,6 +33,7 @@ public class MoveResult {
         this.rejectReason = Objects.requireNonNull(rejectReason);
         this.capturedGroups = List.of();
         this.capturedStoneCount = 0;
+        this.captured = false;
     }
 
     public Move getMove() {
@@ -54,7 +57,7 @@ public class MoveResult {
     }
 
     public boolean hasCaptured() {
-        return capturedStoneCount > 0;
+        return captured;
     }
 
     @Override
@@ -65,4 +68,3 @@ public class MoveResult {
         return String.format("MoveResult{VALID, captured=%d}", capturedStoneCount);
     }
 }
-

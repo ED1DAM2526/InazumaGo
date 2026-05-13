@@ -15,6 +15,8 @@ import es.iesquevedo.model.player.Player;
 import es.iesquevedo.model.player.PlayerColor;
 import es.iesquevedo.model.scoring.ChineseScorerImpl;
 import es.iesquevedo.repository.MainRepository;
+import es.iesquevedo.dto.mapper.GameMapper;
+import es.iesquevedo.dto.mapper.MoveMapper;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -29,6 +31,8 @@ public class GameServiceImpl implements GameService {
     private final MoveValidator validator;
     private final MoveExecutor executor;
     private final ChineseScorerImpl scorer;
+
+    private static final int MAX_UPDATE_RETRIES = 3;
 
     public GameServiceImpl(MainRepository repository) {
         this.repository = repository;
@@ -49,13 +53,14 @@ public class GameServiceImpl implements GameService {
             GameDto dto = GameMapper.toDto(game);
             logger.info("Creating game: " + game.getGameId());
             
-            return game.getGameId();
-        }).thenCompose(gameId -> 
-            // Guardar en Firebase
-            repository.getGame(gameId)
-                .thenApply(g -> gameId)
-                .exceptionally(e -> gameId)
-        );
+            return new Object[] { game.getGameId(), dto };
+        }).thenCompose(obj -> {
+            Object[] pair = (Object[]) obj;
+            String gameId = (String) pair[0];
+            GameDto dto = (GameDto) pair[1];
+            // Guardar en repositorio
+            return repository.updateGame(gameId, dto).thenApply(v -> gameId);
+        });
     }
 
     /**
@@ -79,7 +84,7 @@ public class GameServiceImpl implements GameService {
                 GameDto updated = GameMapper.toDto(game);
                 logger.info("Player joined game: " + gameId);
                 
-                return repository.updateGame(gameId, updated).thenApply(v -> (Void) null);
+                return updateWithRetry(gameId, updated);
             });
     }
 
@@ -98,13 +103,22 @@ public class GameServiceImpl implements GameService {
                         new InvalidMoveException("Game is not playing")
                     );
                 }
-                
+
+                // Verificar que playerId coincide con el jugador que tiene el turno
+                PlayerColor expectedColor = game.getCurrentPlayer();
+                Player expectedPlayer = game.getPlayer(expectedColor);
+                if (expectedPlayer == null || !expectedPlayer.getId().equals(playerId)) {
+                    return CompletableFuture.failedFuture(
+                        new OutOfTurnException("Player is not the one with the current turn")
+                    );
+                }
+
                 // Crear movimiento
-                Move move = new Move(position, game.getCurrentPlayer(), clientNonce);
-                
+                Move move = new Move(position, expectedColor, clientNonce);
+
                 // VALIDAR EN MOTOR (crítico)
-                MoveValidator.ValidationResult validation = validator.validate(
-                    move, 
+                es.iesquevedo.model.move.ValidationResult validation = validator.validate(
+                    move,
                     game.getBoard(),
                     game.getCurrentPlayer(),
                     game.getBoardHistory()
@@ -137,7 +151,7 @@ public class GameServiceImpl implements GameService {
                 MoveDto moveDto = MoveMapper.toDto(move);
                 
                 return repository.writeMoveMultiPath(gameId, moveDto)
-                    .thenCompose(v -> repository.updateGame(gameId, updated));
+                    .thenCompose(v -> updateWithRetry(gameId, updated));
             })
             .exceptionally(ex -> {
                 logger.severe("Error executing move: " + ex.getMessage());
@@ -160,7 +174,16 @@ public class GameServiceImpl implements GameService {
                         new InvalidMoveException("Game is not playing")
                     );
                 }
-                
+
+                // Verificar que playerId coincide con el jugador que tiene el turno
+                PlayerColor expectedColor = game.getCurrentPlayer();
+                Player expectedPlayer = game.getPlayer(expectedColor);
+                if (expectedPlayer == null || !expectedPlayer.getId().equals(playerId)) {
+                    return CompletableFuture.failedFuture(
+                        new OutOfTurnException("Player is not the one with the current turn")
+                    );
+                }
+
                 // Crear movimiento de pase
                 Move pass = Move.pass(game.getCurrentPlayer(), clientNonce);
                 game.recordMove(pass);
@@ -182,7 +205,7 @@ public class GameServiceImpl implements GameService {
                 }
                 
                 GameDto updated = GameMapper.toDto(game);
-                return repository.updateGame(gameId, updated).thenApply(v -> (Void) null);
+                return updateWithRetry(gameId, updated);
             });
     }
 
@@ -209,9 +232,29 @@ public class GameServiceImpl implements GameService {
                 );
             });
     }
+
+    private CompletableFuture<Void> updateWithRetry(String gameId, GameDto updated) {
+        updated.setGameVersion(String.valueOf(System.currentTimeMillis()));
+        return repository.updateGame(gameId, updated).handle((v, ex) -> {
+            if (ex == null) return null;
+            // Intentar reintento simple
+            for (int i = 1; i <= MAX_UPDATE_RETRIES; i++) {
+                try {
+                    Thread.sleep(50 * i);
+                    GameDto latest = repository.getGame(gameId).join();
+                    // merge minimal: overwrite game fields
+                    latest.setName(updated.getName());
+                    latest.setPlayers(updated.getPlayers());
+                    latest.setStatus(updated.getStatus());
+                    latest.setMoves(updated.getMoves());
+                    latest.setGameVersion(String.valueOf(System.currentTimeMillis()));
+                    repository.updateGame(gameId, latest).join();
+                    return null;
+                } catch (Exception retryEx) {
+                    // continue retry
+                }
+            }
+            throw new RuntimeException("Failed to update game after retries", ex);
+        });
+    }
 }
-
-// Imports needed
-import es.iesquevedo.dto.mapper.GameMapper;
-import es.iesquevedo.dto.mapper.MoveMapper;
-

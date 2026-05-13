@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="es.iesquevedo.controller.MainController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="es.iesquevedo.controller.MainController">
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT" padding="10">
+            <children>
+                <Button fx:id="btnNewGame" text="Nueva partida" onAction="#onNewGame" />
+                <Label fx:id="lblStatus" text="Bienvenido" />
+            </children>
+        </HBox>
+    </top>
 
-    <Label fx:id="salutoLabel" text="Cargando..." style="-fx-font-size: 18;"/>
-</VBox>
+    <center>
+        <GridPane fx:id="boardGrid" hgap="2" vgap="2" alignment="CENTER" padding="10">
+            <!-- Las celdas se generan dinámicamente desde el controlador si es necesario -->
+        </GridPane>
+    </center>
+</BorderPane>

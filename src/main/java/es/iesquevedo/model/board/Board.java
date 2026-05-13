@@ -136,5 +136,11 @@ public class Board {
         }
         return hash;
     }
-}
 
+    /**
+     * Devuelve el tamaño del tablero (número de filas/columnas)
+     */
+    public int getSize() {
+        return SIZE;
+    }
+}

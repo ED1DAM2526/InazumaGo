@@ -57,11 +57,11 @@ public class KoDetector {
     public boolean boardsEqual(Board board1, Board board2) {
         return board1.equals(board2);
     }
+
+    // Implementación de Ko detector (placeholder minimal) - evitar código fuera de la clase
+
+    public boolean isKoSituation(String[][] board, int row, int col, String player) {
+        // Implementación mínima: por ahora no bloquear movimientos (puede mejorarse)
+        return false;
+    }
 }
-
-// Imports needed
-import es.iesquevedo.model.board.BoardAnalyzer;
-import es.iesquevedo.model.board.Group;
-import es.iesquevedo.model.board.Position;
-import es.iesquevedo.model.player.PlayerColor;
-

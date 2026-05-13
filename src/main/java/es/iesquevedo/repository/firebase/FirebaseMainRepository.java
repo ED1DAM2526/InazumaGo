@@ -72,6 +72,12 @@ public class FirebaseMainRepository implements MainRepository {
     }
 
     @Override
+    public CompletableFuture<Void> updateGame(String gameId, GameDto updated) {
+        // En implementación real: escritura atómica en Firebase
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
     public String addMovesListener(String gameId, Consumer<List<MoveData>> listener) {
         DatabaseReference ref = database.getReference("games/" + gameId + "/moves");
         ValueEventListener vel = new ValueEventListener() {

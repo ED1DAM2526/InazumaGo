@@ -17,8 +17,12 @@ public interface MainRepository {
 
 	CompletableFuture<Void> writeMoveMultiPath(String gameId, MoveDto payload);
 
+	/**
+	 * Actualiza el estado de la partida en el repositorio
+	 */
+	CompletableFuture<Void> updateGame(String gameId, GameDto updated);
+
 	String addMovesListener(String gameId, Consumer<List<MoveData>> listener);
 
 	String findDefaultName();
 }
-

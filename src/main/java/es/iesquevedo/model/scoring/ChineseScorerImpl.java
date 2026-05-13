@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Scorer: calcula puntuación según reglas chinas de Inazuma Go
  */
-public class ChineseScorerImpl {
+public class ChineseScorerImpl implements Scorer {
     private static final double KOMI = 5.5; // Ventaja blanca
 
     /**
@@ -46,8 +46,8 @@ public class ChineseScorerImpl {
         }
 
         // 4. Calcular puntuación total
-        int blackScore = blackStones + blackTerritory + blackPlayer.getCapturedStones();
-        int whiteScore = (int)(whiteStones + whiteTerritory + whitePlayer.getCapturedStones() + KOMI);
+        int blackScore = blackStones + blackTerritory + (blackPlayer != null ? blackPlayer.getCapturedStones() : 0);
+        int whiteScore = (int)(whiteStones + whiteTerritory + (whitePlayer != null ? whitePlayer.getCapturedStones() : 0) + KOMI);
 
         return new ScoreSnapshot(blackScore, whiteScore, blackTerritory, whiteTerritory);
     }
@@ -55,7 +55,7 @@ public class ChineseScorerImpl {
     /**
      * Calcula la puntuación final de la partida
      */
-    public GameResult calculateFinalScore(Board finalBoard, Player blackPlayer, 
+    public GameResult calculateFinalScore(Board finalBoard, Player blackPlayer,
                                          Player whitePlayer, String reason) {
         // 1. Limpiar tablero: eliminar grupos sin libertades
         Board cleaned = cleanupBoard(finalBoard);
@@ -75,7 +75,7 @@ public class ChineseScorerImpl {
             pointsDifference = snapshot.getWhiteScore() - snapshot.getBlackScore();
         }
 
-        return new GameResult(winner, pointsDifference, 
+        return new GameResult(winner, pointsDifference,
                             snapshot.getBlackScore(), snapshot.getWhiteScore(), reason);
     }
 
@@ -100,8 +100,14 @@ public class ChineseScorerImpl {
 
         return cleaned;
     }
+
+    @Override
+    public ScoreSnapshot computeScore(Board board) {
+        // Usar la API del Board para contar piedras
+        int black = board.countStones(Stone.BLACK);
+        int white = board.countStones(Stone.WHITE);
+
+        // Para una implementación simple devolvemos los conteos como snapshot
+        return new ScoreSnapshot(black, white, 0, 0);
+    }
 }
-
-// Imports needed
-import es.iesquevedo.model.board.Position;
-

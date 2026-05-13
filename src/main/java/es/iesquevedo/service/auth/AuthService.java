@@ -35,4 +35,14 @@ public interface AuthService {
      * @return true si hay token válido
      */
     boolean isAuthenticated();
+
+    /**
+     * Registra un nuevo usuario.
+     *
+     * @param email correo del usuario
+     * @param password contraseña del usuario
+     * @return token de autenticación si el registro es exitoso, null si falla
+     * @throws Exception si el registro falla
+     */
+    String register(String email, String password) throws Exception;
 }

@@ -1,4 +1,4 @@
-﻿package es.iesquevedo.ui;
+package es.iesquevedo.ui;
 
 import es.iesquevedo.service.auth.AuthService;
 import javafx.fxml.FXML;
@@ -64,25 +64,31 @@ public class RegisterController {
             return;
         }
 
-        String token = authService.register(email, password);
+        try {
+            String token = authService.register(email, password);
 
-        if (token != null) {
-            mensajeLabel.setText("¡Cuenta creada exitosamente! Redirigiendo...");
-            mensajeLabel.setStyle("-fx-text-fill: green;");
+            if (token != null) {
+                mensajeLabel.setText("¡Cuenta creada exitosamente! Redirigiendo...");
+                mensajeLabel.setStyle("-fx-text-fill: green;");
 
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1500);
-                    javafx.application.Platform.runLater(() -> {
-                        loginController.volverAlLogin();
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        } else {
-            mensajeLabel.setText("El email ya está registrado o hubo un error.");
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1500);
+                        javafx.application.Platform.runLater(() -> {
+                            loginController.volverAlLogin();
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+            } else {
+                mensajeLabel.setText("El email ya está registrado o hubo un error.");
+                mensajeLabel.setStyle("-fx-text-fill: red;");
+            }
+        } catch (Exception e) {
+            mensajeLabel.setText("Error al registrar: " + e.getMessage());
             mensajeLabel.setStyle("-fx-text-fill: red;");
+            e.printStackTrace();
         }
     }
 

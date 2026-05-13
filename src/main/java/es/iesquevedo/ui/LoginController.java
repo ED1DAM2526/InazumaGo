@@ -26,13 +26,18 @@ public class LoginController {
         String email = emailField.getText();
         String password = passwordField.getText();
 
-        String token = authService.login(email, password);
+        try {
+            String token = authService.login(email, password);
 
-        if (token != null) {
-            // Login correcto → abrir pantalla principal
-            abrirPantallaPrincipal(token);
-        } else {
-            mensajeLabel.setText("Email o contraseña incorrectos.");
+            if (token != null) {
+                // Login correcto → abrir pantalla principal
+                abrirPantallaPrincipal(token);
+            } else {
+                mensajeLabel.setText("Email o contraseña incorrectos.");
+            }
+        } catch (Exception e) {
+            mensajeLabel.setText("Error al iniciar sesión: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

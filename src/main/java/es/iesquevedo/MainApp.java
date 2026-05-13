@@ -40,7 +40,8 @@ public class MainApp {
 
         // Crear servicio y controlador
         var service = new MainServiceImpl(repository);
-        var mainController = new MainController(service);
+        var mainController = new MainController();
+        mainController.setService(service);
 
         // Adaptadores UI
         var ui = new UIAdapter(mainController);

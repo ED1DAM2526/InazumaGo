@@ -3,6 +3,7 @@ package es.iesquevedo.service.auth.impl;
 import es.iesquevedo.service.auth.AuthService;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class AuthServiceMock implements AuthService {
 
@@ -16,7 +17,7 @@ public class AuthServiceMock implements AuthService {
     }
 
     @Override
-    public String login(String email, String password) {
+    public String login(String email, String password) throws Exception {
         if (email != null && !email.isEmpty() && password != null && !password.isEmpty()) {
             // Verificar si el usuario existe y la contraseña es correcta
             if (registeredUsers.containsKey(email) && registeredUsers.get(email).equals(password)) {
@@ -28,16 +29,16 @@ public class AuthServiceMock implements AuthService {
     }
 
     @Override
-    public String register(String email, String password) {
+    public String register(String email, String password) throws Exception {
         if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
             return null;
         }
-        
+
         // Verificar si el email ya está registrado
         if (registeredUsers.containsKey(email)) {
             return null; // El email ya existe
         }
-        
+
         // Registrar el nuevo usuario
         registeredUsers.put(email, password);
         currentToken = "mock-token-" + System.currentTimeMillis();
@@ -45,12 +46,17 @@ public class AuthServiceMock implements AuthService {
     }
 
     @Override
-    public String getToken() {
-        return currentToken;
+    public Optional<String> getToken() {
+        return Optional.ofNullable(currentToken);
     }
 
     @Override
     public void logout() {
         currentToken = null;
+    }
+
+    @Override
+    public boolean isAuthenticated() {
+        return currentToken != null && !currentToken.isEmpty();
     }
 }

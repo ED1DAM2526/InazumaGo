@@ -14,6 +14,10 @@ public class UIAdapter {
     }
 
     public String status() {
-        return mainController.status();
+        return mainController.greet();
+    }
+
+    public String greet() {
+        return mainController.greet();
     }
 }

@@ -1,7 +1,8 @@
 package es.iesquevedo;
 
-import es.iesquevedo.controller.LoginController;
-import es.iesquevedo.service.auth.AuthServiceMock;
+import es.iesquevedo.config.AppConfig;
+import es.iesquevedo.service.impl.MainServiceImpl;
+import es.iesquevedo.ui.MainScreenController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,27 +18,27 @@ public class MainGUI extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Cargar FXML de Login con su controlador
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
-            Parent root = (Parent) loader.load();
-            
-            // Obtener el controlador después de cargar el FXML
-            LoginController loginController = loader.getController();
-            
-            // Inyectar el servicio de autenticación (mock para desarrollo)
-            loginController.setAuthService(new AuthServiceMock());
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainScreen.fxml"));
+            Parent root = loader.load();
 
-            // Crear escena y mostrar ventana
-            Scene scene = new Scene(root, 600, 400);
-            primaryStage.setTitle("InazumaGo - Login");
+            MainScreenController controller = loader.getController();
+            String firebaseUrl = System.getenv("FIREBASE_URL");
+            var repository = AppConfig.createMainRepository(firebaseUrl);
+            var mainService = new MainServiceImpl(repository);
+            controller.setService(mainService);
+
+            Scene scene = new Scene(root, 700, 500);
+            primaryStage.setTitle("InazumaGo - Pantalla Principal");
             primaryStage.setScene(scene);
             primaryStage.show();
 
-            if (LOGGER.isLoggable(Level.INFO)) {
-                LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada exitosamente (Login)");
-            }
+            LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada - Pantalla principal cargada");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al iniciar la aplicación", e);
         }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }

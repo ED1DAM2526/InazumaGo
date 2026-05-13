@@ -82,4 +82,3 @@ public class Game {
         this.finishedAt = LocalDateTime.now();
     }
 }
-

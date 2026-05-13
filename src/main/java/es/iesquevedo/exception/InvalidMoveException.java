@@ -1,7 +1,7 @@
 package es.iesquevedo.exception;
 
 /**
- * Excepción cuando se intenta un movimiento ilegal
+ * Excepción lanzada cuando un movimiento viola las reglas del juego.
  */
 public class InvalidMoveException extends RuntimeException {
     public InvalidMoveException(String message) {
@@ -12,4 +12,3 @@ public class InvalidMoveException extends RuntimeException {
         super(message, cause);
     }
 }
-

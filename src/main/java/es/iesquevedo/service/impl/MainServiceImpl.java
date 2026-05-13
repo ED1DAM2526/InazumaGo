@@ -32,92 +32,9 @@ public class MainServiceImpl implements MainService {
 
     @Override
     public String greet() {
-        if (this.repository == null) {
-            return "Hello, InazumaGoPrevio!";
-        }
-        try {
-            String name = null;
-            try {
-                name = repository.findDefaultName();
-            } catch (Exception e) {
-                // ignore
-            }
-            if (name == null || name.isEmpty()) {
-                throw new es.iesquevedo.exception.NotFoundException("Default player name not found");
-            }
-            return "Hello, " + name + "!";
-        } catch (es.iesquevedo.exception.NotFoundException nf) {
-            throw nf;
-        } catch (Exception e) {
-            throw new RuntimeException("Error getting default name", e);
-        }
-    }
-
-    @Override
-    public void startNewGame() {
-        board = new String[3][3];
-        currentPlayer = "X";
-        winner = Optional.empty();
-    }
-
-    @Override
-    public boolean makeMove(Position position) {
-        if (winner.isPresent()) {
-            throw new RuntimeException("La partida ya finalizó");
-        }
-        int r = position.getRow();
-        int c = position.getCol();
-        if (r < 0 || r >= board.length || c < 0 || c >= board.length) {
-            throw new RuntimeException("Posición fuera de rango");
-        }
-        if (board[r][c] != null && !board[r][c].isEmpty()) {
-            throw new RuntimeException("Celda ocupada");
-        }
-        board[r][c] = currentPlayer;
-        // comprobar ganador
-        if (checkWinner(currentPlayer)) {
-            winner = Optional.of(currentPlayer);
-        } else if (isBoardFull()) {
-            winner = Optional.of("EMPATE");
-        } else {
-            currentPlayer = currentPlayer.equals("X") ? "O" : "X";
-        }
-        return true;
-    }
-
-    @Override
-    public String[][] getBoard() {
-        // devolver copia defensiva
-        String[][] copy = new String[board.length][board.length];
-        for (int i = 0; i < board.length; i++) {
-            System.arraycopy(board[i], 0, copy[i], 0, board.length);
-        }
-        return copy;
-    }
-
-    @Override
-    public String getCurrentPlayer() {
-        return currentPlayer;
-    }
-
-    @Override
-    public Optional<String> getWinner() {
-        return winner;
-    }
-
-    private boolean isBoardFull() {
-        for (int r = 0; r < board.length; r++) {
-            for (int c = 0; c < board.length; c++) {
-                if (board[r][c] == null || board[r][c].isEmpty()) return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean checkWinner(String player) {
-        // filas
-        for (int r = 0; r < 3; r++) {
-            if (player.equals(board[r][0]) && player.equals(board[r][1]) && player.equals(board[r][2])) return true;
+        String name = repository.findDefaultName();
+        if (name == null || name.trim().isEmpty()) {
+            throw new NotFoundException("Default player name not found");
         }
         // columnas
         for (int c = 0; c < 3; c++) {

@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -47,10 +45,10 @@ class LoginTokenFlowIntegrationTest {
         String token = authService.login("qa@inazuma.local", "secret");
 
         assertTrue(authService.getToken().isPresent());
-        assertEquals(token, authService.getToken().orElseThrow());
+        assertEquals(token, authService.getToken().orElse(null));
 
-        FirebaseHttpClient firebaseHttpClient = new FirebaseHttpClient(baseUrl, HttpClient.newHttpClient(), authService);
-        HttpResponse<String> response = firebaseHttpClient.get("/games.json");
+        FirebaseHttpClient firebaseHttpClient = new FirebaseHttpClient(baseUrl, authService);
+        FirebaseHttpClient.HttpResponse<String> response = firebaseHttpClient.get("/games.json");
 
         assertEquals(200, response.statusCode());
         assertEquals("Bearer " + token, capturedAuthorization);

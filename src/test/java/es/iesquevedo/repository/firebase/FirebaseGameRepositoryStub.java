@@ -5,6 +5,7 @@ import es.iesquevedo.dto.MoveData;
 import es.iesquevedo.dto.MoveDto;
 import es.iesquevedo.repository.MainRepository;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -32,7 +33,7 @@ public class FirebaseGameRepositoryStub implements MainRepository {
                     return null; // Simula 404 o error
                 }
                 // Simula respuesta 200: devuelve un GameDto simulado
-                GameDto simulatedGame = new GameDto("simulated-" + gameId, "Simulated Game", List.of("player1", "player2"), "IN_PROGRESS", System.currentTimeMillis());
+                GameDto simulatedGame = new GameDto("simulated-" + gameId, "Simulated Game", Arrays.asList("player1", "player2"), "IN_PROGRESS", System.currentTimeMillis());
                 return simulatedGame;
             } catch (InterruptedException e) {
                 throw new RuntimeException("Simulated timeout");
@@ -78,7 +79,7 @@ public class FirebaseGameRepositoryStub implements MainRepository {
             try {
                 Thread.sleep(timeout); // Usa timeout para delay
                 if (!endpoint.contains("error")) {
-                    List<MoveData> simulatedMoves = List.of(
+                    List<MoveData> simulatedMoves = Arrays.asList(
                         new MoveData("player1", "KICK", null),
                         new MoveData("player2", "PASS", null)
                     );

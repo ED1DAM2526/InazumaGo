@@ -3,6 +3,9 @@ package es.iesquevedo.controller;
 import es.iesquevedo.config.AppState;
 import es.iesquevedo.service.auth.AuthService;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -10,6 +13,7 @@ import javafx.scene.paint.Color;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import es.iesquevedo.util.EmailUtils;
 
 /**
  * Controlador para la pantalla de login.
@@ -66,6 +70,13 @@ public class LoginController {
             return;
         }
 
+        // Validar formato de email (asegura que contenga '@' y estructura básica)
+        if (!EmailUtils.isValidEmail(email)) {
+            updateStatus("El email no tiene un formato válido. Ej: usuario@ejemplo.com", "error");
+            LOGGER.log(Level.WARNING, "Intento de login con email inválido: " + email);
+            return;
+        }
+
         if (password == null || password.trim().isEmpty()) {
             updateStatus("La contraseña no puede estar vacía", "error");
             LOGGER.log(Level.WARNING, "Intento de login sin contraseña");
@@ -94,12 +105,38 @@ public class LoginController {
             emailField.clear();
             passwordField.clear();
 
-            // Nota: En una app real aquí navegerías a la pantalla principal
-            // Por ahora solo mostramos el mensaje de éxito
+            // Navegar a la pantalla de juego
+            navigateToGame(email);
 
         } catch (Exception e) {
             updateStatus("✗ Error de login: " + e.getMessage(), "error");
             LOGGER.log(Level.WARNING, "Error en login: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Navega a la pantalla de juego después del login exitoso.
+     *
+     * @param playerName nombre del jugador autenticado
+     */
+    private void navigateToGame(String playerName) {
+        try {
+            FXMLLoader gameLoader = new FXMLLoader(getClass().getResource("/fxml/Game.fxml"));
+            Parent gameRoot = gameLoader.load();
+
+            GameController gameController = gameLoader.getController();
+            gameController.setPlayerNames(playerName, "Oponente");
+            gameController.setInitialScores(0, 0);
+            
+            Scene scene = emailField.getScene();
+            scene.setRoot(gameRoot);
+            javafx.stage.Stage stage = (javafx.stage.Stage) scene.getWindow();
+            stage.setTitle("InazumaGo - Partida");
+            
+            LOGGER.log(Level.INFO, "Navegado a pantalla de juego para: " + playerName);
+        } catch (Exception e) {
+            updateStatus("✗ Error al cargar pantalla de juego: " + e.getMessage(), "error");
+            LOGGER.log(Level.SEVERE, "Error al cargar Game.fxml: " + e.getMessage());
         }
     }
 
@@ -133,5 +170,7 @@ public class LoginController {
             statusLabel.setTextFill(Color.BLACK);
         }
     }
+
+    // ...existing code...
 }
 

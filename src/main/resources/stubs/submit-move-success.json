@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "PATCH",
+    "urlPathPattern": "/games/game-123/moves/.*\\.json"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "status": "confirmed"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

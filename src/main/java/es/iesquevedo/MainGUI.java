@@ -1,7 +1,7 @@
 package es.iesquevedo;
 
 import es.iesquevedo.config.AppConfig;
-import es.iesquevedo.service.impl.MainServiceImpl;
+import es.iesquevedo.repository.MainRepository;
 import es.iesquevedo.ui.MainScreenController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -18,16 +18,17 @@ public class MainGUI extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Load the new main screen FXML
+            // Load the main screen FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainScreen.fxml"));
             Parent root = loader.load();
 
-            // Get controller and inject service
+            // Get controller and inject repository (NOT service)
             MainScreenController controller = loader.getController();
             String firebaseUrl = System.getenv("FIREBASE_URL");
-            var repository = AppConfig.createMainRepository(firebaseUrl);
-            var mainService = new MainServiceImpl(repository);
-            controller.setService(mainService);
+            MainRepository repository = AppConfig.createMainRepository(firebaseUrl);
+
+            // Pass repository to controller
+            controller.setService(repository);
 
             // Set up stage
             Scene scene = new Scene(root, 700, 500);

@@ -2,22 +2,26 @@ package es.iesquevedo.dto;
 
 import java.util.List;
 
-/**
- * Representa el payload que se envía cuando un jugador hace movimientos.
- * Se serializa a JSON para enviar a Firebase/API.
- */
 public class MovePayload {
     private List<MoveData> moves;
     private long timestamp;
-    private String gameVersion; // para evitar conflictos de actualización
+    private int row;      // Fila del movimiento
+    private int col;      // Columna del movimiento
+    private String playerId;
 
     // Constructores
     public MovePayload() {}
 
+    public MovePayload(int row, int col, String playerId) {
+        this.row = row;
+        this.col = col;
+        this.playerId = playerId;
+        this.timestamp = System.currentTimeMillis();
+    }
+
     public MovePayload(List<MoveData> moves, long timestamp) {
         this.moves = moves;
         this.timestamp = timestamp;
-        this.gameVersion = String.valueOf(System.currentTimeMillis());
     }
 
     // Getters y Setters
@@ -27,6 +31,12 @@ public class MovePayload {
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
-    public String getGameVersion() { return gameVersion; }
-    public void setGameVersion(String gameVersion) { this.gameVersion = gameVersion; }
+    public int getRow() { return row; }
+    public void setRow(int row) { this.row = row; }
+
+    public int getCol() { return col; }
+    public void setCol(int col) { this.col = col; }
+
+    public String getPlayerId() { return playerId; }
+    public void setPlayerId(String playerId) { this.playerId = playerId; }
 }

@@ -1,6 +1,7 @@
 package es.iesquevedo.repository;
 
 import es.iesquevedo.dto.GameDto;
+import es.iesquevedo.dto.GameStateDto;
 import es.iesquevedo.dto.MoveData;
 import es.iesquevedo.dto.MovePayload;
 
@@ -24,15 +25,6 @@ public interface MainRepository {
      * Escribe movimientos en múltiples paths de una partida.
      * Esto usa una petición PATCH para actualizar varias rutas a la vez.
      *
-     * Ejemplo de payload:
-     * {
-     *   "moves": [
-     *     { "playerId": "player1", "move": "KICK", "position": {"x": 10, "y": 20} },
-     *     { "playerId": "player2", "move": "PASS", "position": {"x": 15, "y": 25} }
-     *   ],
-     *   "timestamp": 1710786000000
-     * }
-     *
      * @param gameId ID de la partida
      * @param payload objeto con la estructura de movimientos
      * @return CompletableFuture que resuelve cuando se confirma la escritura
@@ -41,11 +33,9 @@ public interface MainRepository {
 
     /**
      * Suscribe un listener a cambios en los movimientos de una partida.
-     * Se llamará cada vez que haya nuevos movimientos.
-     *
      * @param gameId ID de la partida
      * @param listener función que recibe el array de movimientos actualizado
-     * @return ID de la suscripción (para poder desuscribirse después)
+     * @return ID de la suscripción
      */
     String addMovesListener(String gameId, Consumer<java.util.List<MoveData>> listener);
 
@@ -57,4 +47,38 @@ public interface MainRepository {
     void removeMovesListener(String gameId, String listenerId);
 
     String findDefaultName();
+
+    // ========== NUEVOS MÉTODOS PARA E3-US3 ==========
+
+    /**
+     * Crea una nueva partida.
+     * @param playerId ID del jugador que crea la partida
+     * @return CompletableFuture con el ID de la partida creada
+     */
+    CompletableFuture<String> createGame(String playerId);
+
+    /**
+     * Unirse a una partida existente.
+     * @param gameId ID de la partida
+     * @param playerId ID del jugador que se une
+     * @return CompletableFuture con el estado actualizado de la partida
+     */
+    CompletableFuture<GameStateDto> joinGame(String gameId, String playerId);
+
+    /**
+     * Envía un movimiento en una partida.
+     * @param gameId ID de la partida
+     * @param playerId ID del jugador que hace el movimiento
+     * @param payload datos del movimiento
+     * @param clientNonce identificador único para evitar duplicados
+     * @return CompletableFuture con el estado actualizado de la partida
+     */
+    CompletableFuture<GameStateDto> submitMove(String gameId, String playerId, MovePayload payload, String clientNonce);
+
+    /**
+     * Obtiene el estado actual de una partida.
+     * @param gameId ID de la partida
+     * @return CompletableFuture con el estado de la partida
+     */
+    CompletableFuture<GameStateDto> getGameState(String gameId);
 }

@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/games.json"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "name": "game-123"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "PATCH",
+    "urlPathPattern": "/games/game-123.json"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "status": "IN_PROGRESS",
+      "players": ["player1", "player2"],
+      "currentTurn": "player1"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

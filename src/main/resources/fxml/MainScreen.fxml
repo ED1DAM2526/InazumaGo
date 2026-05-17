@@ -15,6 +15,14 @@
 
     <Label text="InazumaGo - Principal" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
 
+    <!-- NUEVOS BOTONES PARA CREAR/UNIRSE A PARTIDA -->
+    <HBox spacing="20" alignment="CENTER">
+        <Button fx:id="createGameButton" text="🎮 Crear Partida" onAction="#onCreateGame"/>
+        <Button fx:id="joinGameButton" text="🔗 Unirse a Partida" onAction="#onJoinGameDialog"/>
+    </HBox>
+
+    <Separator/>
+
     <HBox spacing="20" alignment="CENTER">
         <Button fx:id="randomMatchButton" text="🔀 Emparejamiento Aleatorio" onAction="#onRandomMatch"/>
         <Button text="🔄 Actualizar Jugadores" onAction="#onRefreshPlayers"/>

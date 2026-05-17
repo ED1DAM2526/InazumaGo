@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="es.iesquevedo.ui.GameController"
+      spacing="20"
+      alignment="TOP_CENTER"
+      padding="20">
+
+    <Label text="InazumaGo - Partida" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+    <HBox spacing="20" alignment="CENTER">
+        <Label fx:id="gameIdLabel" style="-fx-font-size: 14px;"/>
+        <Label fx:id="turnLabel" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+        <Label fx:id="statusLabel" style="-fx-font-size: 14px;"/>
+    </HBox>
+
+    <GridPane fx:id="boardGrid" hgap="5" vgap="5" alignment="CENTER">
+        <Button fx:id="cell_0_0" text=" " prefWidth="60" prefHeight="60" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Button fx:id="cell_0_1" text=" " prefWidth="60" prefHeight="60" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Button fx:id="cell_0_2" text=" " prefWidth="60" prefHeight="60" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+        <Button fx:id="cell_1_0" text=" " prefWidth="60" prefHeight="60" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <Button fx:id="cell_1_1" text=" " prefWidth="60" prefHeight="60" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Button fx:id="cell_1_2" text=" " prefWidth="60" prefHeight="60" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+        <Button fx:id="cell_2_0" text=" " prefWidth="60" prefHeight="60" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <Button fx:id="cell_2_1" text=" " prefWidth="60" prefHeight="60" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Button fx:id="cell_2_2" text=" " prefWidth="60" prefHeight="60" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+    </GridPane>
+
+    <Button fx:id="resignButton" text="Rendirse" onAction="#onResign" style="-fx-background-color: red; -fx-text-fill: white;"/>
+
+    <Label text="(Demo: tablero 3x3. Integrar con lógica real después)" style="-fx-font-size: 12px; -fx-text-fill: gray;"/>
+
+</VBox>

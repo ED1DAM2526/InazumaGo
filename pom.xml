@@ -18,11 +18,6 @@
         <!-- JavaFX para UI -->
         <dependency>
             <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>21</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>21</version>
         </dependency>
@@ -102,6 +97,10 @@
                     <excludes>
                         <exclude>**/MainTest.java</exclude>
                     </excludes>
+                    <!-- Configurar filtros por grupos (JUnit 5 Tags) -->
+                    <groups>${groups}</groups>
+                    <!-- Aumentar timeout para tests de integración -->
+                    <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
                 </configuration>
             </plugin>
             <plugin>

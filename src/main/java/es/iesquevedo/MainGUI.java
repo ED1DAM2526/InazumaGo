@@ -1,8 +1,7 @@
 package es.iesquevedo;
 
-import es.iesquevedo.config.AppConfig;
-import es.iesquevedo.service.impl.MainServiceImpl;
-import es.iesquevedo.ui.MainScreenController;
+import es.iesquevedo.controller.LoginController;
+import es.iesquevedo.service.auth.AuthServiceMock;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,23 +17,23 @@ public class MainGUI extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainScreen.fxml"));
+            // Cargar pantalla de login
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
             Parent root = loader.load();
 
-            MainScreenController controller = loader.getController();
-            String firebaseUrl = System.getenv("FIREBASE_URL");
-            var repository = AppConfig.createMainRepository(firebaseUrl);
-            var mainService = new MainServiceImpl(repository);
-            controller.setService(mainService);
+            // Configurar LoginController
+            LoginController controller = loader.getController();
+            controller.setAuthService(new AuthServiceMock());
 
-            Scene scene = new Scene(root, 700, 500);
-            primaryStage.setTitle("InazumaGo - Pantalla Principal");
+            Scene scene = new Scene(root, 500, 400);
+            primaryStage.setTitle("InazumaGo - Login");
             primaryStage.setScene(scene);
             primaryStage.show();
 
-            LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada - Pantalla principal cargada");
+            LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada - Pantalla de login cargada");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al iniciar la aplicación", e);
+            e.printStackTrace();
         }
     }
 

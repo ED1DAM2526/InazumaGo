@@ -74,4 +74,3 @@ public class Move {
         return "Move{" + "playerId='" + playerId + '\'' + ", row=" + row + ", col=" + col + ", timestamp=" + timestamp + '}';
     }
 }
-

@@ -45,6 +45,38 @@ if ($JdkPath) {
     }
 }
 
+# Intento de auto-detección en rutas comunes (Windows)
+function Find-JdkInCommonPaths {
+    $candidates = @(
+        'C:\Program Files\Java',
+        'C:\Program Files (x86)\Java',
+        'C:\Program Files\AdoptOpenJDK',
+        'C:\Program Files\Amazon Corretto',
+        'C:\Program Files\Eclipse Adoptium',
+        'C:\Program Files\Microsoft\jdk'
+    )
+
+    foreach ($base in $candidates) {
+        if (Test-Path $base) {
+            Get-ChildItem -Path $base -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+                $possible = Join-Path $_.FullName 'bin\javac.exe'
+                if (Test-Path $possible) { return $_.FullName }
+            }
+        }
+    }
+    return $null
+}
+
+$foundAuto = Find-JdkInCommonPaths
+if ($foundAuto) {
+    Write-Host "Se detectó posible JDK en: $foundAuto. Aplicando a la sesión..." -ForegroundColor Green
+    $env:JAVA_HOME = $foundAuto
+    $env:Path = "$(Join-Path $env:JAVA_HOME 'bin');$env:Path"
+    try { & javac -version 2>&1 | ForEach-Object { Write-Host $_ } } catch { }
+    Write-Host "JAVA_HOME establecido temporalmente. Ejecuta: .\mvnw.cmd -DskipTests=false test"
+    exit 0
+}
+
 Write-Host "Opciones:\n 1) Ejecutar scripts/use-user-jdk.ps1 para establecer JAVA_HOME localmente (interactivo).\n 2) Instalar un JDK y configurar JAVA_HOME.\n 3) Para CI, asegúrate de que la imagen tenga JDK (el pipeline de ejemplo usa eclipse-temurin:21).\n"
 Show-Help
 exit 1

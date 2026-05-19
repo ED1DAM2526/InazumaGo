@@ -38,21 +38,47 @@ Write-Host "Ejecutando tests de InazumaGo (usando Maven Wrapper)" -ForegroundCol
 Write-Host "===============================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Intentar aplicar JDK desde doc/ia/user-prompt.md en modo no interactivo.
-# El script use-user-jdk.ps1 fallará con código distinto de 0 si no hay JDK_PATH válida.
-$useJdkScript = Join-Path $scriptDir 'use-user-jdk.ps1'
-if (Test-Path $useJdkScript) {
-    Write-Host "[*] Aplicando JDK desde doc/ia/user-prompt.md (si existe)..." -ForegroundColor Yellow
-    powershell -ExecutionPolicy Bypass -File $useJdkScript -NonInteractive
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "ERROR: no se pudo aplicar el JDK desde doc/ia/user-prompt.md (código $LASTEXITCODE). Este script requiere que JDK esté configurado en ese archivo. Abortando." -ForegroundColor Red
-        # Si el script hijo ya mostró un mensaje de error específico, no lo sobrescribimos; aquí reiteramos el mensaje conforme a la política estricta.
-        Write-Host 'ERROR: `JDK_PATH` no encontrado en `doc/ia/user-prompt.md`. Configure la ruta al JDK 21 en ese archivo y vuelva a intentarlo.' -ForegroundColor Red
-        exit $LASTEXITCODE
+# Comprobar disponibilidad de compilador (javac). Intentar auto-configuración desde scripts/check-jdk.ps1
+$checkJdk = Join-Path $scriptDir 'check-jdk.ps1'
+if (Test-Path $checkJdk) {
+    Write-Host "[*] Comprobando JDK local (javac)..." -ForegroundColor Yellow
+    powershell -ExecutionPolicy Bypass -File $checkJdk
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[*] Javac disponible. Continuando..." -ForegroundColor Green
+    } else {
+        Write-Host "[!] No se detectó javac automáticamente. Intentando obtener ruta desde doc/ia/user-prompt.md..." -ForegroundColor Yellow
+
+        $userPrompt = Join-Path $projectRoot 'doc\ia\user-prompt.md'
+        if (Test-Path $userPrompt) {
+            $content = Get-Content $userPrompt -Raw -ErrorAction SilentlyContinue
+            if ($content -match "\$env:JAVA_HOME\s*=\s*'([^']+)'") {
+                $found = $matches[1]
+                Write-Host "[*] Se encontró JAVA_HOME en $userPrompt: $found" -ForegroundColor Yellow
+                $useJdkScript = Join-Path $scriptDir 'use-user-jdk.ps1'
+                if (Test-Path $useJdkScript) {
+                    Write-Host "[*] Aplicando JDK desde $userPrompt (no interactivo)..." -ForegroundColor Yellow
+                    powershell -ExecutionPolicy Bypass -File $useJdkScript -JdkPath $found -NonInteractive
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Host "ERROR: no se pudo aplicar JDK desde $userPrompt (codigo $LASTEXITCODE)." -ForegroundColor Red
+                        Write-Host "Por favor ejecuta: .\scripts\use-user-jdk.ps1 y proporciona la ruta al JDK o instala un JDK en el sistema." -ForegroundColor Red
+                        exit $LASTEXITCODE
+                    }
+                } else {
+                    Write-Host "ERROR: no se encontró scripts/use-user-jdk.ps1. Ejecuta manualmente para configurar JAVA_HOME." -ForegroundColor Red
+                    exit 5
+                }
+            } else {
+                Write-Host "No se encontró una entrada de JAVA_HOME en $userPrompt." -ForegroundColor Yellow
+                Write-Host "Ejecuta .\scripts\use-user-jdk.ps1 para configurar el JDK de forma interactiva o instala un JDK en el sistema." -ForegroundColor Yellow
+                exit 6
+            }
+        } else {
+            Write-Host "No existe $userPrompt. Ejecuta .\scripts\use-user-jdk.ps1 para configurar JAVA_HOME o instala un JDK localmente." -ForegroundColor Yellow
+            exit 7
+        }
     }
 } else {
-    Write-Host "ERROR: no se encontró scripts/use-user-jdk.ps1. Este script requiere que exista y aplique el JDK desde doc/ia/user-prompt.md. Abortando." -ForegroundColor Red
-    exit 5
+    Write-Host "WARNING: no se encontró scripts/check-jdk.ps1. Asegúrate de tener un JDK instalado y javac en PATH." -ForegroundColor Yellow
 }
 
 # Cambiar al directorio del proyecto

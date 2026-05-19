@@ -280,6 +280,13 @@ public class GameController {
         }
     }
 
+    public void initGame(String gameId, String playerName) {
+        this.player1Name = playerName + " (Negro)";
+        this.player2Name = "Oponente (Blanco)";
+        updatePlayerInfo();
+        LOGGER.log(Level.INFO, "Partida iniciada - GameID: " + gameId + " - Jugador: " + playerName);
+    }
+
     private boolean isValidPosition(int row, int col) {
         return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
     }

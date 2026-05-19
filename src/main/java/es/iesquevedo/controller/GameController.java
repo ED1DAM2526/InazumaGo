@@ -1,5 +1,14 @@
 package es.iesquevedo.controller;
 
+import es.iesquevedo.model.Board;
+import es.iesquevedo.model.Game;
+import es.iesquevedo.model.GameState;
+import es.iesquevedo.model.Move;
+import es.iesquevedo.model.Player;
+import es.iesquevedo.service.impl.InazumaGoMoveValidator;
+import es.iesquevedo.exception.InvalidMoveException;
+import es.iesquevedo.exception.PlayerNotInTurnException;
+
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
@@ -34,30 +43,32 @@ public class GameController {
 
     private String player1Name = "Jugador 1";
     private String player2Name = "Jugador 2";
-    private int player1Score = 0;
-    private int player2Score = 0;
     private long player1TimeMs = 0;
     private long player2TimeMs = 0;
-    private boolean isPlayer1Turn = true;
-    private Stone[][] board;
     private AnimationTimer gameTimer;
     private long lastTime = 0;
     private boolean gameEnded = false;
-
-    enum Stone {
-        EMPTY, BLACK, WHITE
-    }
+    
+    // Lógica real del juego
+    private Game game;
+    private InazumaGoMoveValidator moveValidator;
+    private boolean moveInProgress = false;
 
     @FXML
     public void initialize() {
         LOGGER.log(Level.INFO, "GameController inicializado");
-        board = new Stone[BOARD_SIZE][BOARD_SIZE];
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                board[i][j] = Stone.EMPTY;
-            }
-        }
-
+        
+        // Inicializar validador de movimientos
+        moveValidator = new InazumaGoMoveValidator();
+        
+        // Crear juego con dos jugadores locales
+        Player player1 = new Player("1", player1Name);
+        Player player2 = new Player("2", player2Name);
+        
+        game = new Game("Local Game", player1);
+        game.addPlayer(player2);
+        game.start();
+        
         updatePlayerInfo();
         drawBoard();
         boardCanvas.setOnMouseClicked(this::onBoardClick);
@@ -72,12 +83,30 @@ public class GameController {
     }
 
     private void updateScores() {
-        player1ScoreLabel.setText("Puntos: " + player1Score);
-        player2ScoreLabel.setText("Puntos: " + player2Score);
+        // Calcular puntuación simple: contar piedras por color
+        Board board = game.getBoard();
+        int blackStones = 0;
+        int whiteStones = 0;
+        
+        for (int r = 0; r < BOARD_SIZE; r++) {
+            for (int c = 0; c < BOARD_SIZE; c++) {
+                int cell = board.getCell(r, c);
+                if (cell == 1) blackStones++;
+                else if (cell == 2) whiteStones++;
+            }
+        }
+        
+        // Komi (ventaja blanca): 5.5
+        double blackScore = blackStones;
+        double whiteScore = whiteStones + 5.5;
+        
+        player1ScoreLabel.setText(String.format("Puntos: %.1f", blackScore));
+        player2ScoreLabel.setText(String.format("Puntos: %.1f", whiteScore));
     }
 
     private void updateCurrentTurn() {
-        String turn = isPlayer1Turn ? player1Name : player2Name;
+        Player currentPlayer = game.getCurrentPlayer();
+        String turn = currentPlayer != null ? currentPlayer.getName() : player1Name;
         currentTurnLabel.setText("Turno: " + turn);
     }
 
@@ -170,22 +199,26 @@ public class GameController {
             }
         }
 
-        // Dibujar piedras actuales (usa drawStone)
+        // Dibujar piedras del tablero real (Board)
+        Board board = game.getBoard();
         for (int r = 0; r < BOARD_SIZE; r++) {
             for (int c = 0; c < BOARD_SIZE; c++) {
-                if (board[r][c] != Stone.EMPTY) {
-                    drawStone(gc, r, c, board[r][c]);
+                int cell = board.getCell(r, c);
+                if (cell == 1) { // Negro
+                    drawStone(gc, r, c, 1);
+                } else if (cell == 2) { // Blanco
+                    drawStone(gc, r, c, 2);
                 }
             }
         }
     }
 
-    private void drawStone(GraphicsContext gc, int row, int col, Stone stone) {
+    private void drawStone(GraphicsContext gc, int row, int col, int stoneColor) {
         double x = getIntersectionX(col);
         double y = getIntersectionY(row);
         double radius = CELL_SIZE / 2 - 3;
 
-        if (stone == Stone.BLACK) {
+        if (stoneColor == 1) { // Negro
             // sombra proyectada
             gc.setFill(Color.color(0, 0, 0, 0.28));
             gc.fillOval(x - radius + 2, y - radius + 3, radius * 1.9, radius * 1.9);
@@ -220,7 +253,7 @@ public class GameController {
             gc.setLineWidth(0.6);
             gc.strokeOval(x - radius, y - radius, radius * 2, radius * 2);
 
-        } else {
+        } else if (stoneColor == 2) { // Blanco
             // piedra blanca: sombra más suave
             gc.setFill(Color.color(0.06, 0.06, 0.06, 0.14));
             gc.fillOval(x - radius + 1.8, y - radius + 2.6, radius * 1.95, radius * 1.95);
@@ -262,8 +295,7 @@ public class GameController {
 
     @FXML
     private void onBoardClick(MouseEvent event) {
-        if (gameEnded) {
-            statusLabel.setText("Partida finalizada");
+        if (gameEnded || moveInProgress) {
             return;
         }
 
@@ -285,40 +317,119 @@ public class GameController {
     }
 
     private void placeStone(int row, int col) {
-        if (board[row][col] != Stone.EMPTY) {
-            statusLabel.setText("Posición ocupada");
+        if (moveInProgress || gameEnded) {
             return;
         }
-
-        Stone stone = isPlayer1Turn ? Stone.BLACK : Stone.WHITE;
-        board[row][col] = stone;
-
-        if (isPlayer1Turn) {
-            player1Score++;
-        } else {
-            player2Score++;
+        
+        moveInProgress = true;
+        
+        try {
+            Player currentPlayer = game.getCurrentPlayer();
+            
+            if (currentPlayer == null) {
+                statusLabel.setText("Error: sin jugador actual");
+                moveInProgress = false;
+                return;
+            }
+            
+            // Crear movimiento con playerId
+            Move move = new Move(currentPlayer.getId(), row, col);
+            
+            // Validar movimiento
+            moveValidator.validateMove(game, move);
+            
+            // Guardar estado previo para detectar repetición
+            Board previousBoardState = game.getBoard().clone();
+            
+            // Ejecutar movimiento en el tablero
+            Board board = game.getBoard();
+            int playerColor = (game.getCurrentPlayerIndex() == 0) ? 1 : 2; // 1=Negro, 2=Blanco
+            board.placeStone(row, col, playerColor);
+            
+            // Capturar grupos enemigos sin libertades
+            int capturedCount = board.captureGroupsWithoutLiberties();
+            
+            // Registrar movimiento
+            move.setCapturedCount(capturedCount);
+            game.getMoves().add(move);
+            
+            // Detectar repetición de posición (se ignora la reversión por ahora)
+            if (game.getLastBoardState() != null && board.equals(game.getLastBoardState())) {
+                statusLabel.setText("Movimiento rechazado: repetición de posición");
+                moveInProgress = false;
+                return;
+            }
+            
+            game.setLastBoardState(previousBoardState);
+            
+            // Movimiento exitoso
+            statusLabel.setText("Movimiento realizado" + (capturedCount > 0 ? " (" + capturedCount + " piedras capturadas)" : ""));
+            
+            // Cambiar turno
+            game.nextTurn();
+            game.resetConsecutivePasses();
+            
+            updatePlayerInfo();
+            drawBoard();
+            moveInProgress = false;
+            
+            LOGGER.log(Level.INFO, "Piedra colocada en [" + row + "," + col + "], capturadas: " + capturedCount);
+            
+        } catch (InvalidMoveException | PlayerNotInTurnException ex) {
+            statusLabel.setText("Movimiento inválido: " + ex.getMessage());
+            moveInProgress = false;
+            LOGGER.log(Level.WARNING, "Error en movimiento: " + ex.getMessage());
+        } catch (Exception ex) {
+            statusLabel.setText("Error: " + ex.getMessage());
+            moveInProgress = false;
+            LOGGER.log(Level.SEVERE, "Error inesperado en movimiento: " + ex.getMessage());
         }
-
-        isPlayer1Turn = !isPlayer1Turn;
-        updateScores();
-        updateCurrentTurn();
-        drawBoard();
-
-        statusLabel.setText("Piedra colocada");
-        LOGGER.log(Level.INFO, "Piedra colocada en [" + row + "," + col + "]");
     }
 
     @FXML
     private void onPassTurn() {
-        if (gameEnded) {
-            statusLabel.setText("Partida finalizada");
+        if (gameEnded || moveInProgress) {
             return;
         }
 
-        isPlayer1Turn = !isPlayer1Turn;
-        updateCurrentTurn();
-        statusLabel.setText((isPlayer1Turn ? player1Name : player2Name) + " pasó su turno");
-        LOGGER.log(Level.INFO, "Turno pasado");
+        moveInProgress = true;
+        
+        try {
+            Player currentPlayer = game.getCurrentPlayer();
+            if (currentPlayer == null) {
+                statusLabel.setText("Error: sin jugador actual");
+                moveInProgress = false;
+                return;
+            }
+            
+            // Crear movimiento de PASE
+            Move move = new Move(currentPlayer.getId(), true); // PASE
+            
+            // Validar (pasadas sin validación especial)
+            moveValidator.validateMove(game, move);
+            
+            // Registrar pase
+            game.getMoves().add(move);
+            game.incrementConsecutivePasses();
+            
+            // Cambiar turno
+            game.nextTurn();
+            
+            statusLabel.setText(currentPlayer.getName() + " pasó su turno. Pases consecutivos: " + game.getConsecutivePasses());
+            
+            // Verificar doble pase = fin de partida
+            if (game.getConsecutivePasses() >= 2) {
+                endGame();
+            }
+            
+            updateCurrentTurn();
+            moveInProgress = false;
+            
+            LOGGER.log(Level.INFO, "Turno pasado. Pases consecutivos: " + game.getConsecutivePasses());
+        } catch (Exception ex) {
+            statusLabel.setText("Error al pasar: " + ex.getMessage());
+            moveInProgress = false;
+        }
     }
 
     @FXML
@@ -330,10 +441,15 @@ public class GameController {
     @FXML
     private void onSurrender() {
         gameEnded = true;
-        String winner = isPlayer1Turn ? player2Name : player1Name;
-        String loser = isPlayer1Turn ? player1Name : player2Name;
-        statusLabel.setText(winner + " ganó. " + loser + " se rindió");
-        LOGGER.log(Level.INFO, loser + " se rindió. Ganador: " + winner);
+        game.setState(GameState.FINISHED);
+        
+        Player winner = game.getPlayers().get((game.getCurrentPlayerIndex() + 1) % 2);
+        Player loser = game.getCurrentPlayer();
+        
+        game.setWinnerPlayerId(winner.getId());
+        
+        statusLabel.setText(winner.getName() + " ganó. " + loser.getName() + " se rindió");
+        LOGGER.log(Level.INFO, loser.getName() + " se rindió. Ganador: " + winner.getName());
     }
 
     @FXML
@@ -343,6 +459,36 @@ public class GameController {
         // Castear a Stage para poder cerrar la ventana
         javafx.stage.Stage stage = (javafx.stage.Stage) boardCanvas.getScene().getWindow();
         stage.close();
+    }
+    
+    private void endGame() {
+        gameEnded = true;
+        game.setState(GameState.FINISHED);
+        
+        // Calcular puntuación final
+        Board board = game.getBoard();
+        int blackStones = 0;
+        int whiteStones = 0;
+        
+        for (int r = 0; r < BOARD_SIZE; r++) {
+            for (int c = 0; c < BOARD_SIZE; c++) {
+                int cell = board.getCell(r, c);
+                if (cell == 1) blackStones++;
+                else if (cell == 2) whiteStones++;
+            }
+        }
+        
+        double blackScore = blackStones;
+        double whiteScore = whiteStones + 5.5;
+        
+        String winner = blackScore > whiteScore ? player1Name : player2Name;
+        String result = String.format("Partida finalizada. %s gana %.1f - %.1f", 
+            winner, Math.max(blackScore, whiteScore), Math.min(blackScore, whiteScore));
+        
+        statusLabel.setText(result);
+        LOGGER.log(Level.INFO, result);
+        
+        stopGameTimer();
     }
 
     private void startGameTimer() {
@@ -358,7 +504,7 @@ public class GameController {
                 lastTime = now;
 
                 if (!gameEnded) {
-                    if (isPlayer1Turn) {
+                    if (game.getCurrentPlayerIndex() == 0) {
                         player1TimeMs += elapsedNanos / 1_000_000;
                     } else {
                         player2TimeMs += elapsedNanos / 1_000_000;
@@ -397,8 +543,7 @@ public class GameController {
     }
 
     public void setInitialScores(int score1, int score2) {
-        this.player1Score = score1;
-        this.player2Score = score2;
+        // Puntuación inicial se calcula del Board, no se establece manualmente
         if (player1ScoreLabel != null) {
             updateScores();
         }

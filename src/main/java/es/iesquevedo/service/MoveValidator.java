@@ -19,4 +19,3 @@ public interface MoveValidator {
      */
     void validateMove(Game game, Move move) throws InvalidMoveException, PlayerNotInTurnException;
 }
-

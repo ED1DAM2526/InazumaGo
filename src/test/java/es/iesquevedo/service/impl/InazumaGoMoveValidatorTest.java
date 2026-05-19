@@ -109,4 +109,3 @@ class InazumaGoMoveValidatorTest {
         assertDoesNotThrow(() -> validator.validateMove(game, move));
     }
 }
-

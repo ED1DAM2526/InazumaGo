@@ -13,7 +13,7 @@ package es.iesquevedo.dto;
  *   System.out.println(posicion.getY()); // Salida: 4.2
  * </pre>
  *
- * @author [BreinnerImbachi]
+ * @author [BreinnerStivenImbachi]
  * @version 1.0
  * @since 1.0
  */

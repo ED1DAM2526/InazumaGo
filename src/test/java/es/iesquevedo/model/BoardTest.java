@@ -160,4 +160,3 @@ class BoardTest {
         assertTrue(board.equals(board2), "Tableros con mismo estado deben ser iguales");
     }
 }
-

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="450.0" style="-fx-background-color: #1a1a1a;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="es.iesquevedo.controller.RegisterController">
+    <center>
+        <VBox alignment="CENTER" prefHeight="500.0" prefWidth="450.0" spacing="20.0" style="-fx-background-color: #1a1a1a;">
+            <padding>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
+            <Label text="Crear Cuenta" textFill="#ffffff">
+                <font>
+                    <Font name="System Bold" size="32.0" />
+                </font>
+            </Label>
+            <Label text="InazumaGo" textFill="#4db8ff">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
+            <Separator prefWidth="200.0" style="-fx-border-color: #333333;" />
+            <VBox spacing="10.0">
+                <Label text="Email" textFill="#cccccc">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+                <TextField fx:id="emailField" prefHeight="40.0" prefWidth="200.0" promptText="ejemplo@correo.com" style="-fx-font-size: 14; -fx-padding: 10;" />
+            </VBox>
+            <VBox spacing="10.0">
+                <Label text="Contraseña" textFill="#cccccc">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+                <PasswordField fx:id="passwordField" prefHeight="40.0" prefWidth="200.0" promptText="Mínimo 6 caracteres" style="-fx-font-size: 14; -fx-padding: 10;" />
+            </VBox>
+            <VBox spacing="10.0">
+                <Label text="Confirmar Contraseña" textFill="#cccccc">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+                <PasswordField fx:id="confirmPasswordField" prefHeight="40.0" prefWidth="200.0" promptText="Repite la contraseña" style="-fx-font-size: 14; -fx-padding: 10;" />
+            </VBox>
+            <Label fx:id="messageLabel" textFill="#ff3333" wrapText="true" />
+            <Button fx:id="registerButton" onAction="#onRegisterButtonClicked" prefHeight="40.0" prefWidth="200.0" style="-fx-font-size: 14; -fx-padding: 10; -fx-background-color: #4db8ff; -fx-text-fill: white; -fx-cursor: hand;" text="Registrarse" />
+            <Button fx:id="backButton" onAction="#onBackButtonClicked" prefHeight="35.0" prefWidth="200.0" style="-fx-font-size: 12; -fx-padding: 8; -fx-background-color: #333333; -fx-text-fill: #cccccc; -fx-cursor: hand;" text="Volver al Login" />
+        </VBox>
+    </center>
+</BorderPane>
+

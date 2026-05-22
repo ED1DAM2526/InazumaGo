@@ -8,18 +8,22 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="es.iesquevedo.ui.MatchingScreenController"
       spacing="20"
-      alignment="CENTER"
-      padding="20">
+      alignment="CENTER">
 
-    <Label text="Buscando oponente..." style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20" />
+    </padding>
+
+    <Label text="Emparejamiento" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
 
     <ProgressIndicator/>
 
-    <Label fx:id="statusLabel" text="Buscando jugador disponible..." style="-fx-font-size: 14px;"/>
+    <Label fx:id="statusLabel" text="Pulsa 'Buscar partida' para iniciar la simulación." style="-fx-font-size: 14px;"/>
 
     <Label fx:id="timeLabel" text="Tiempo de espera: 0s" style="-fx-font-size: 12px; -fx-text-fill: gray;"/>
 
     <HBox spacing="20" alignment="CENTER">
+        <Button fx:id="searchButton" text="Buscar partida" onAction="#onSearchClicked" style="-fx-background-color: #228B22; -fx-text-fill: white;"/>
         <Button fx:id="cancelButton" text="Cancelar" onAction="#onCancel" style="-fx-background-color: #ff4444; -fx-text-fill: white;"/>
     </HBox>
 

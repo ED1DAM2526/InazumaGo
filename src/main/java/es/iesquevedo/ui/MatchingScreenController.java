@@ -4,6 +4,7 @@ import es.iesquevedo.controller.GameController;
 import es.iesquevedo.model.Game;
 import es.iesquevedo.model.Player;
 import es.iesquevedo.service.GameService;
+import es.iesquevedo.service.impl.GameServiceImpl;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -33,7 +34,10 @@ public class MatchingScreenController {
     @FXML
     private Button cancelButton;
 
-    private GameService gameService;
+    @FXML
+    private Button searchButton;
+
+    private GameService gameService = new GameServiceImpl();
     private Player currentPlayer;
     private Timer timer;
     private int elapsedSeconds = 0;
@@ -46,6 +50,23 @@ public class MatchingScreenController {
 
     public void startMatching(Player player) {
         this.currentPlayer = player;
+        if (this.gameService == null) {
+            this.gameService = new GameServiceImpl();
+        }
+        updateReadyState();
+    }
+
+    @FXML
+    private void onSearchClicked() {
+        if (currentPlayer == null) {
+            statusLabel.setText("No hay jugador autenticado");
+            return;
+        }
+        if (searching) {
+            return;
+        }
+        searching = true;
+        elapsedSeconds = 0;
         startTimer();
         startSearch();
     }
@@ -65,6 +86,12 @@ public class MatchingScreenController {
 
     private void startSearch() {
         statusLabel.setText("Buscando jugador disponible...");
+        if (searchButton != null) {
+            searchButton.setDisable(true);
+        }
+        if (cancelButton != null) {
+            cancelButton.setText("Cancelar");
+        }
 
         currentSearch = CompletableFuture.supplyAsync(() -> {
             try {
@@ -84,6 +111,10 @@ public class MatchingScreenController {
             if (game != null && searching) {
                 Platform.runLater(() -> {
                     stopTimer();
+                    searching = false;
+                    if (searchButton != null) {
+                        searchButton.setDisable(false);
+                    }
                     statusLabel.setText("¡Oponente encontrado!");
                     navigateToGame(game.getId());
                 });
@@ -92,6 +123,10 @@ public class MatchingScreenController {
             Platform.runLater(() -> {
                 if (searching) {
                     statusLabel.setText("Error en la búsqueda. Intenta de nuevo.");
+                    searching = false;
+                    if (searchButton != null) {
+                        searchButton.setDisable(false);
+                    }
                     cancelButton.setText("Volver");
                 }
             });
@@ -126,23 +161,45 @@ public class MatchingScreenController {
 
     @FXML
     private void onCancel() {
-        searching = false;
-        if (currentSearch != null) {
-            currentSearch.cancel(true);
+        if (searching) {
+            searching = false;
+            if (currentSearch != null) {
+                currentSearch.cancel(true);
+            }
+            stopTimer();
+            if (searchButton != null) {
+                searchButton.setDisable(false);
+            }
+            goBackToMainMenu();
+            return;
         }
-        stopTimer();
         goBackToMainMenu();
+    }
+
+    private void updateReadyState() {
+        searching = false;
+        statusLabel.setText(currentPlayer != null
+                ? "Listo para buscar partida. Pulsa 'Buscar partida'."
+                : "Cargando jugador...");
+        if (timeLabel != null) {
+            timeLabel.setText("Tiempo de espera: 0s");
+        }
+        if (searchButton != null) {
+            searchButton.setDisable(false);
+        }
+        if (cancelButton != null) {
+            cancelButton.setText("Volver");
+        }
     }
 
     private void goBackToMainMenu() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainScreen.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
             Parent root = loader.load();
 
-            // Just load the main screen - no additional setup needed
             Stage stage = (Stage) cancelButton.getScene().getWindow();
             stage.setScene(new Scene(root, 700, 500));
-            stage.setTitle("InazumaGo - Pantalla Principal");
+            stage.setTitle("InazumaGo - Login");
             stage.show();
 
         } catch (IOException e) {

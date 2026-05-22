@@ -5,6 +5,7 @@ import es.iesquevedo.model.Game;
 import es.iesquevedo.model.GameState;
 import es.iesquevedo.model.Move;
 import es.iesquevedo.model.Player;
+import es.iesquevedo.service.impl.GameServiceImpl;
 import es.iesquevedo.service.impl.InazumaGoMoveValidator;
 import es.iesquevedo.exception.InvalidMoveException;
 import es.iesquevedo.exception.PlayerNotInTurnException;
@@ -43,6 +44,7 @@ public class GameController {
 
     private String player1Name = "Jugador 1";
     private String player2Name = "Jugador 2";
+    private String matchingPlayerName = "Jugador";
     private long player1TimeMs = 0;
     private long player2TimeMs = 0;
     private AnimationTimer gameTimer;
@@ -313,8 +315,15 @@ public class GameController {
     }
 
     public void initGame(String gameId, String playerName) {
-        this.player1Name = playerName + " (Negro)";
-        this.player2Name = "Oponente (Blanco)";
+        this.matchingPlayerName = playerName != null ? playerName : "Jugador";
+        this.player1Name = this.matchingPlayerName;
+        this.player2Name = "Oponente";
+
+        if (game != null && game.getPlayers().size() >= 2) {
+            game.getPlayers().get(0).setName(this.player1Name);
+            game.getPlayers().get(1).setName(this.player2Name);
+        }
+
         updatePlayerInfo();
         LOGGER.log(Level.INFO, "Partida iniciada - GameID: " + gameId + " - Jugador: " + playerName);
     }
@@ -462,10 +471,27 @@ public class GameController {
     @FXML
     private void onBackToMenu() {
         stopGameTimer();
-        LOGGER.log(Level.INFO, "Volviendo al menú");
-        // Castear a Stage para poder cerrar la ventana
-        javafx.stage.Stage stage = (javafx.stage.Stage) boardCanvas.getScene().getWindow();
-        stage.close();
+        LOGGER.log(Level.INFO, "Volviendo al emparejamiento");
+        goToMatchingScreen();
+    }
+
+    private void goToMatchingScreen() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/MatchingScreen.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            es.iesquevedo.ui.MatchingScreenController controller = loader.getController();
+            controller.setGameService(new GameServiceImpl());
+            controller.startMatching(new Player(matchingPlayerName, matchingPlayerName));
+
+            javafx.stage.Stage stage = (javafx.stage.Stage) boardCanvas.getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(root, 500, 300));
+            stage.setTitle("InazumaGo - Emparejamiento");
+            stage.show();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error al volver al emparejamiento", e);
+            statusLabel.setText("Error al volver al emparejamiento");
+        }
     }
     
     private void endGame() {

@@ -5,11 +5,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests para AuthService (mock para desarrollo).
+ * Tests para AuthService con Firebase Auth real.
  */
 public class AuthServiceTest {
     private AuthService authService;
@@ -20,35 +21,47 @@ public class AuthServiceTest {
     }
 
     @Test
-    void testLoginSuccess() throws Exception {
-        CompletableFuture<String> result = authService.login("test@example.com", "password123");
-        String token = result.get();
+    void testSignupSuccess() throws Exception {
+        String email = "signup" + System.currentTimeMillis() + "@test.com";
+        String password = "password123";
+        
+        if (authService instanceof AuthServiceImpl) {
+            AuthServiceImpl authImpl = (AuthServiceImpl) authService;
+            CompletableFuture<String> result = authImpl.signup(email, password);
+            String token = result.get();
 
-        assertNotNull(token);
-        assertTrue(token.startsWith("dev-token-"));
-        assertEquals(token, authService.getCurrentToken());
+            assertNotNull(token);
+            assertFalse(token.isBlank());
+            assertEquals(email, authImpl.getCurrentEmail());
+        }
     }
 
     @Test
     void testLoginWithInvalidEmail() {
-        assertThrows(Exception.class, () -> 
+        assertThrows(ExecutionException.class, () -> 
             authService.login("", "password123").get()
         );
     }
 
     @Test
     void testLoginWithShortPassword() {
-        assertThrows(Exception.class, () -> 
+        assertThrows(ExecutionException.class, () -> 
             authService.login("test@example.com", "12345").get()
         );
     }
 
     @Test
-    void testLogout() throws Exception {
-        authService.login("test@example.com", "password123").get();
-        assertNotNull(authService.getCurrentToken());
+    void testLogoutAfterSignup() throws Exception {
+        if (authService instanceof AuthServiceImpl) {
+            AuthServiceImpl authImpl = (AuthServiceImpl) authService;
+            String email = "logout" + System.currentTimeMillis() + "@test.com";
+            String password = "password123";
+            
+            authImpl.signup(email, password).get();
+            assertNotNull(authService.getCurrentToken());
 
-        authService.logout();
-        assertNull(authService.getCurrentToken());
+            authService.logout();
+            assertNull(authService.getCurrentToken());
+        }
     }
 }

@@ -6,10 +6,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +32,9 @@ public class LoginController {
 
     @FXML
     private Label statusLabel;
+
+    @FXML
+    private Button registerButton;
 
     private AuthService authService;
     private AppState appState;
@@ -105,8 +110,8 @@ public class LoginController {
             emailField.clear();
             passwordField.clear();
 
-            // Navegar a la pantalla de juego
-            navigateToGame(email);
+            // Navegar a la pantalla de emparejamiento
+            navigateToMatching(email);
 
         } catch (Exception e) {
             updateStatus("✗ Error de login: " + e.getMessage(), "error");
@@ -115,29 +120,37 @@ public class LoginController {
     }
 
     /**
-     * Navega a la pantalla de juego después del login exitoso.
+     * Navega a la pantalla de emparejamiento después del login exitoso.
      *
-     * @param playerName nombre del jugador autenticado
+     * @param playerEmail email del jugador autenticado
      */
-    private void navigateToGame(String playerName) {
+    private void navigateToMatching(String playerEmail) {
         try {
-            FXMLLoader gameLoader = new FXMLLoader(getClass().getResource("/fxml/Game.fxml"));
-            Parent gameRoot = gameLoader.load();
+            FXMLLoader matchingLoader = new FXMLLoader(getClass().getResource("/fxml/MatchingScreen.fxml"));
+            Parent matchingRoot = matchingLoader.load();
 
-            GameController gameController = gameLoader.getController();
-            gameController.setPlayerNames(playerName, "Oponente");
-            gameController.setInitialScores(0, 0);
+            es.iesquevedo.ui.MatchingScreenController matchingController = matchingLoader.getController();
+            String playerName = buildDisplayName(playerEmail);
+            matchingController.startMatching(new es.iesquevedo.model.Player(playerEmail, playerName));
             
             Scene scene = emailField.getScene();
-            scene.setRoot(gameRoot);
+            scene.setRoot(matchingRoot);
             javafx.stage.Stage stage = (javafx.stage.Stage) scene.getWindow();
-            stage.setTitle("InazumaGo - Partida");
+            stage.setTitle("InazumaGo - Emparejamiento");
             
-            LOGGER.log(Level.INFO, "Navegado a pantalla de juego para: " + playerName);
+            LOGGER.log(Level.INFO, "Navegado a pantalla de emparejamiento para: " + playerEmail);
         } catch (Exception e) {
-            updateStatus("✗ Error al cargar pantalla de juego: " + e.getMessage(), "error");
-            LOGGER.log(Level.SEVERE, "Error al cargar Game.fxml: " + e.getMessage());
+            updateStatus("✗ Error al cargar pantalla de emparejamiento: " + e.getMessage(), "error");
+            LOGGER.log(Level.SEVERE, "Error al cargar MatchingScreen.fxml: " + e.getMessage());
         }
+    }
+
+    private String buildDisplayName(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return "Jugador";
+        }
+        int atIndex = email.indexOf('@');
+        return atIndex > 0 ? email.substring(0, atIndex) : email;
     }
 
     /**
@@ -171,6 +184,25 @@ public class LoginController {
         }
     }
 
-    // ...existing code...
+    /**
+     * Navega a la pantalla de registro.
+     */
+    @FXML
+    public void onRegisterClicked() {
+        try {
+            FXMLLoader registerLoader = new FXMLLoader(getClass().getResource("/fxml/Register.fxml"));
+            Parent registerRoot = registerLoader.load();
+            
+            Scene scene = emailField.getScene();
+            scene.setRoot(registerRoot);
+            Stage stage = (Stage) scene.getWindow();
+            stage.setTitle("InazumaGo - Registro");
+            
+            LOGGER.log(Level.INFO, "Navegado a pantalla de registro");
+        } catch (Exception e) {
+            updateStatus("✗ Error al cargar pantalla de registro: " + e.getMessage(), "error");
+            LOGGER.log(Level.SEVERE, "Error al cargar Register.fxml: " + e.getMessage());
+        }
+    }
 }
 

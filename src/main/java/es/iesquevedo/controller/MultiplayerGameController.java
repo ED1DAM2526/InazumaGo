@@ -379,27 +379,50 @@ public class MultiplayerGameController {
 
             multiplayerService.sendRemoteMove(gameId, remotePass).thenAccept(v -> {
                 Platform.runLater(() -> {
-                    game.nextTurn();
-                    game.incrementConsecutivePasses();
-                    statusLabel.setText(localPlayerName + " pasó su turno");
+                    try {
+                        game.nextTurn();
+                        game.incrementConsecutivePasses();
+                        statusLabel.setText(localPlayerName + " pasó su turno (Pases consecutivos: " + game.getConsecutivePasses() + ")");
 
-                    if (game.getConsecutivePasses() >= 2) {
-                        endGame();
+                        if (game.getConsecutivePasses() >= 2) {
+                            endGame();
+                        }
+
+                        updateCurrentTurn();
+                        moveInProgress = false;
+                        LOGGER.log(Level.INFO, "Turno pasado exitosamente. Pases: " + game.getConsecutivePasses());
+                    } catch (Exception ex) {
+                        LOGGER.log(Level.SEVERE, "Error después de recibir pase: " + ex.getMessage());
+                        statusLabel.setText("Error actualizando turno: " + ex.getMessage());
+                        moveInProgress = false;
                     }
-
-                    updateCurrentTurn();
-                    moveInProgress = false;
                 });
             }).exceptionally(ex -> {
                 Platform.runLater(() -> {
-                    statusLabel.setText("Error: " + ex.getMessage());
+                    LOGGER.log(Level.SEVERE, "Error al enviar pase: " + ex.getMessage());
+                    statusLabel.setText("Error al pasar turno: " + ex.getMessage());
                     moveInProgress = false;
+                    // Intentar recuperarse
+                    try {
+                        game.nextTurn();
+                        updateCurrentTurn();
+                    } catch (Exception retryEx) {
+                        LOGGER.log(Level.SEVERE, "Error al recuperarse del fallo: " + retryEx.getMessage());
+                    }
                 });
                 return null;
             });
         } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Error crítico en onPassTurn: " + ex.getMessage());
             statusLabel.setText("Error al pasar turno: " + ex.getMessage());
             moveInProgress = false;
+            // Intentar avanzar el turno de todas formas
+            try {
+                game.nextTurn();
+                updateCurrentTurn();
+            } catch (Exception retryEx) {
+                LOGGER.log(Level.SEVERE, "Error al recuperarse: " + retryEx.getMessage());
+            }
         }
     }
 
@@ -418,6 +441,31 @@ public class MultiplayerGameController {
 
         multiplayerService.finishMultiplayerGame(gameId, winner.getId()).thenAccept(v -> {
             LOGGER.log(Level.INFO, message);
+        });
+
+        // Mostrar diálogo de victoria
+        showVictoryDialog(winner.getName(), localPlayerName);
+    }
+
+    private void showVictoryDialog(String winnerName, String loserName) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle("¡Partida Finalizada!");
+        alert.setHeaderText("🏆 " + winnerName + " Ha Ganado 🏆");
+        alert.setContentText(loserName + " se rindió.\n\n¿Deseas buscar otra partida?\nPulsa OK para volver al menú.");
+        alert.setOnCloseRequest(e -> onBackToMenu());
+
+        // Customizar el botón OK
+        javafx.scene.control.ButtonType okButton = alert.getButtonTypes().get(0);
+        javafx.scene.control.Button button = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okButton);
+        if (button != null) {
+            button.setText("Volver al Menú");
+            button.setStyle("-fx-font-size: 12; -fx-padding: 8;");
+        }
+
+        alert.showAndWait().ifPresent(result -> {
+            if (result == okButton) {
+                onBackToMenu();
+            }
         });
     }
 

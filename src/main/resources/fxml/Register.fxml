@@ -46,7 +46,11 @@
                 </Label>
                 <PasswordField fx:id="confirmPasswordField" prefHeight="40.0" prefWidth="200.0" promptText="Repite la contraseña" style="-fx-font-size: 14; -fx-padding: 10;" />
             </VBox>
-            <Label fx:id="messageLabel" textFill="#ff3333" wrapText="true" />
+            <Label fx:id="messageLabel" textFill="#ff3333" wrapText="true">
+                <font>
+                    <Font size="13.0" />
+                </font>
+            </Label>
             <Button fx:id="registerButton" onAction="#onRegisterButtonClicked" prefHeight="40.0" prefWidth="200.0" style="-fx-font-size: 14; -fx-padding: 10; -fx-background-color: #4db8ff; -fx-text-fill: white; -fx-cursor: hand;" text="Registrarse" />
             <Button fx:id="backButton" onAction="#onBackButtonClicked" prefHeight="35.0" prefWidth="200.0" style="-fx-font-size: 12; -fx-padding: 8; -fx-background-color: #333333; -fx-text-fill: #cccccc; -fx-cursor: hand;" text="Volver al Login" />
         </VBox>

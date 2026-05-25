@@ -1,7 +1,7 @@
 package es.iesquevedo.controller;
 
 import es.iesquevedo.config.AppState;
-import es.iesquevedo.service.auth.AuthService;
+import es.iesquevedo.service.AuthService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -36,6 +36,7 @@ public class LoginController {
     @FXML
     private Button registerButton;
 
+
     private AuthService authService;
     private AppState appState;
 
@@ -44,6 +45,26 @@ public class LoginController {
      */
     public LoginController() {
         this.appState = AppState.getInstance();
+    }
+
+    /**
+     * Se llama después de que FXML carga el layout.
+     * Configura los listeners de teclado.
+     */
+    @FXML
+    public void initialize() {
+        // Permitir que Enter en emailField y passwordField dispare el login
+        emailField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                onLoginClicked();
+            }
+        });
+        
+        passwordField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                onLoginClicked();
+            }
+        });
     }
 
     /**
@@ -96,26 +117,64 @@ public class LoginController {
                 return;
             }
 
-            String token = authService.login(email, password);
+            authService.login(email, password)
+                .thenAccept(token -> {
+                    javafx.application.Platform.runLater(() -> {
+                        // Guardar token en AppState
+                        appState.setAuthToken(token);
+                        appState.setCurrentUserEmail(email);
+                        
+                        // Log para debuguear
+                        LOGGER.log(Level.INFO, "Token guardado en AppState: " + (token != null ? "SÍ" : "NO"));
 
-            // Guardar token en AppState
-            appState.setAuthToken(token);
-            appState.setCurrentUserEmail(email);
+                        // Mostrar éxito
+                        updateStatus("✓ Login exitoso. Bienvenido, " + email, "success");
+                        LOGGER.log(Level.INFO, "Login exitoso para: " + email);
 
-            // Mostrar éxito
-            updateStatus("✓ Login exitoso. Bienvenido, " + email, "success");
-            LOGGER.log(Level.INFO, "Login exitoso para: " + email);
+                        // Limpiar campos
+                        emailField.clear();
+                        passwordField.clear();
 
-            // Limpiar campos
-            emailField.clear();
-            passwordField.clear();
-
-            // Navegar a la pantalla de emparejamiento
-            navigateToMatching(email);
+                        // Navegar al menú principal
+                        navigateToMainMenu(email);
+                    });
+                })
+                .exceptionally(ex -> {
+                    javafx.application.Platform.runLater(() -> {
+                        updateStatus("✗ Error de login: " + ex.getMessage(), "error");
+                        LOGGER.log(Level.WARNING, "Error en login: " + ex.getMessage());
+                    });
+                    return null;
+                });
 
         } catch (Exception e) {
             updateStatus("✗ Error de login: " + e.getMessage(), "error");
             LOGGER.log(Level.WARNING, "Error en login: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Navega al menú principal después del login exitoso.
+     *
+     * @param playerEmail email del jugador autenticado
+     */
+    private void navigateToMainMenu(String playerEmail) {
+        try {
+            FXMLLoader mainMenuLoader = new FXMLLoader(getClass().getResource("/fxml/MainMenu.fxml"));
+            Parent mainMenuRoot = mainMenuLoader.load();
+
+            es.iesquevedo.controller.MainMenuController mainMenuController = mainMenuLoader.getController();
+            mainMenuController.setPlayerEmail(playerEmail);
+            
+            Scene scene = emailField.getScene();
+            scene.setRoot(mainMenuRoot);
+            javafx.stage.Stage stage = (javafx.stage.Stage) scene.getWindow();
+            stage.setTitle("InazumaGo - Menú Principal");
+            
+            LOGGER.log(Level.INFO, "Navegado al menú principal para: " + playerEmail);
+        } catch (Exception e) {
+            updateStatus("✗ Error al cargar menú principal: " + e.getMessage(), "error");
+            LOGGER.log(Level.SEVERE, "Error al cargar MainMenu.fxml: " + e.getMessage());
         }
     }
 
@@ -163,6 +222,7 @@ public class LoginController {
         statusLabel.setText("");
         LOGGER.log(Level.INFO, "Campos limpiados");
     }
+
 
     /**
      * Actualiza el label de estado con mensaje y color.

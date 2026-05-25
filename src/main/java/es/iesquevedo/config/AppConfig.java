@@ -2,12 +2,9 @@ package es.iesquevedo.config;
 
 import es.iesquevedo.repository.MainRepository;
 import es.iesquevedo.repository.firebase.FirebaseMainRepository;
-import es.iesquevedo.repository.firebase.GameEventRepository;
 import es.iesquevedo.repository.inmemory.InMemoryMainRepository;
 import es.iesquevedo.service.MainService;
-import es.iesquevedo.service.GameEventService;
 import es.iesquevedo.service.impl.MainServiceImpl;
-import es.iesquevedo.service.impl.GameEventServiceImpl;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -115,32 +112,4 @@ public final class AppConfig {
         return Integer.parseInt(props.getProperty("wiremock.server.port", "8080"));
     }
 
-    /**
-     * Crea el repositorio de eventos de juego con una URL de Firebase
-     */
-    public static GameEventRepository createGameEventRepository(String firebaseUrl) {
-        return new GameEventRepository(firebaseUrl);
-    }
-
-    /**
-     * Crea el repositorio de eventos de juego desde un Firebase Database mockeado (para tests)
-     */
-    public static GameEventRepository createGameEventRepositoryFromDatabase(com.google.firebase.database.FirebaseDatabase database) {
-        return new GameEventRepository(database);
-    }
-
-    /**
-     * Crea el servicio de eventos de juego
-     */
-    public static GameEventService createGameEventService(String firebaseUrl) {
-        GameEventRepository repository = createGameEventRepository(firebaseUrl);
-        return new GameEventServiceImpl(repository);
-    }
-
-    /**
-     * Crea el servicio de eventos de juego desde un repositorio mockeado (para tests)
-     */
-    public static GameEventService createGameEventService(GameEventRepository repository) {
-        return new GameEventServiceImpl(repository);
-    }
 }

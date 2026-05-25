@@ -1,7 +1,7 @@
 package es.iesquevedo;
 
 import es.iesquevedo.controller.LoginController;
-import es.iesquevedo.service.auth.AuthServiceMock;
+import es.iesquevedo.service.impl.AuthServiceImpl;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,11 +23,12 @@ public class MainGUI extends Application {
 
             // Configurar LoginController
             LoginController controller = loader.getController();
-            controller.setAuthService(new AuthServiceMock());
+            controller.setAuthService(new AuthServiceImpl());
 
-            Scene scene = new Scene(root, 500, 400);
+            Scene scene = new Scene(root, 1200, 800);
             primaryStage.setTitle("InazumaGo - Login");
             primaryStage.setScene(scene);
+            primaryStage.setMaximized(true);
             primaryStage.show();
 
             LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada - Pantalla de login cargada");

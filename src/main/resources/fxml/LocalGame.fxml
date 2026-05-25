@@ -10,8 +10,9 @@
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="es.iesquevedo.controller.GameController"
-            prefWidth="900" prefHeight="800">
+            fx:controller="es.iesquevedo.controller.LocalGameController"
+            prefWidth="900" prefHeight="800"
+            style="-fx-background-color: linear-gradient(to right, #1a1a2e, #16213e);">
 
     <!-- TOP: Información de jugadores y tiempo -->
     <top>
@@ -19,7 +20,7 @@
             <padding>
                 <Insets top="10" bottom="10" left="15" right="15"/>
             </padding>
-            
+
             <!-- Nombres de jugadores y marcador -->
             <HBox spacing="30" alignment="CENTER">
                 <!-- Jugador 1 (Negro) -->
@@ -74,21 +75,20 @@
             <padding>
                 <Insets top="5" bottom="5" left="15" right="15"/>
             </padding>
-            
+
             <HBox spacing="10" alignment="CENTER">
                 <Button text="Pasar turno" onAction="#onPassTurn"
                         style="-fx-padding: 8px 20px; -fx-font-size: 12; -fx-background-color: #4CAF50; -fx-text-fill: white; -fx-cursor: hand; -fx-border-radius: 5;"/>
-                <Button text="Deshacer" onAction="#onUndo"
-                        style="-fx-padding: 8px 20px; -fx-font-size: 12; -fx-background-color: #2196F3; -fx-text-fill: white; -fx-cursor: hand; -fx-border-radius: 5;"/>
                 <Button text="Rendirse" onAction="#onSurrender"
                         style="-fx-padding: 8px 20px; -fx-font-size: 12; -fx-background-color: #F44336; -fx-text-fill: white; -fx-cursor: hand; -fx-border-radius: 5;"/>
                 <Button text="Volver al menú" onAction="#onBackToMenu"
                         style="-fx-padding: 8px 20px; -fx-font-size: 12; -fx-background-color: #FF9800; -fx-text-fill: white; -fx-cursor: hand; -fx-border-radius: 5;"/>
             </HBox>
-            
+
             <Label fx:id="statusLabel" text=""
                    style="-fx-font-size: 11; -fx-text-fill: #666666;"
                    wrapText="true" alignment="CENTER"/>
         </VBox>
     </bottom>
 </BorderPane>
+

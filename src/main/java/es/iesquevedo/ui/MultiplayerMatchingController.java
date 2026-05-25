@@ -218,8 +218,17 @@ public class MultiplayerMatchingController {
 
             MultiplayerGameController controller = loader.getController();
             
+            // Obtener email del jugador - respaldo desde AppState si es necesario
+            String playerEmail = null;
+            if (currentPlayer != null && currentPlayer.getId() != null) {
+                playerEmail = currentPlayer.getId();
+            } else {
+                String appStateEmail = AppState.getInstance().getCurrentUserEmail();
+                playerEmail = appStateEmail != null ? appStateEmail : "Jugador";
+            }
+            
             if ("creador".equals(role)) {
-                controller.initMultiplayerGame(gameId, currentPlayer.getId(), FIREBASE_URL);
+                controller.initMultiplayerGame(gameId, playerEmail, FIREBASE_URL);
             } else {
                 controller.joinMultiplayerGame(gameId, currentPlayer, FIREBASE_URL);
             }

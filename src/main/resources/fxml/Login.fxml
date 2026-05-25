@@ -4,51 +4,128 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="450.0" style="-fx-background-color: #1a1a1a;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="es.iesquevedo.controller.LoginController">
-    <center>
-        <VBox alignment="CENTER" prefHeight="400.0" prefWidth="450.0" spacing="15.0" style="-fx-background-color: #1a1a1a;">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: linear-gradient(to right, #1a1a2e, #16213e);" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="es.iesquevedo.controller.LoginController">
+
+    <!-- LEFT: Logo y descripción -->
+    <left>
+        <VBox alignment="TOP_CENTER" prefWidth="350.0" spacing="30.0" style="-fx-background-color: linear-gradient(to bottom, #0f3460, #1a1a2e); -fx-padding: 40;">
             <padding>
-                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                <Insets bottom="40.0" left="30.0" right="30.0" top="80.0" />
             </padding>
-            <Label text="InazumaGo" textFill="#ffffff">
+
+            <Label text="🎮 InazumaGo" textFill="#FFFFFF">
                 <font>
-                    <Font name="System Bold" size="36.0" />
+                    <Font name="System Bold" size="48.0" />
                 </font>
             </Label>
-            <Label text="Iniciar sesión" textFill="#cccccc">
+
+            <Label text="El Go moderno" textFill="#E0E0E0">
                 <font>
-                    <Font size="16.0" />
+                    <Font name="System Bold" size="18.0" />
                 </font>
             </Label>
-            <Separator prefWidth="200.0" style="-fx-border-color: #333333;" />
-            <VBox spacing="10.0">
-                <Label text="Email" textFill="#cccccc">
+
+            <Separator style="-fx-border-color: #00D4FF; -fx-border-width: 2 0 0 0; -fx-padding: 0;" />
+
+            <VBox spacing="20.0">
+                <Label text="✨ Juega en tiempo real" textFill="#B0E0E6">
                     <font>
-                        <Font size="12.0" />
+                        <Font size="13.0" />
                     </font>
                 </Label>
-                <TextField fx:id="emailField" prefHeight="40.0" promptText="tu.email@ejemplo.com" style="-fx-font-size: 14; -fx-padding: 10;" />
-            </VBox>
-            <VBox spacing="10.0">
-                <Label text="Contraseña" textFill="#cccccc">
+                <Label text="⚡ Partidas rápidas" textFill="#B0E0E6">
                     <font>
-                        <Font size="12.0" />
+                        <Font size="13.0" />
                     </font>
                 </Label>
-                <PasswordField fx:id="passwordField" prefHeight="40.0" promptText="Tu contraseña" style="-fx-font-size: 14; -fx-padding: 10;" />
+                <Label text="🌍 Juega con otros" textFill="#B0E0E6">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+                <Label text="🏆 Juega gratis" textFill="#B0E0E6">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
             </VBox>
-            <Label fx:id="statusLabel" textFill="#ff3333" wrapText="true" />
-            <Button onAction="#onLoginClicked" prefHeight="40.0" prefWidth="200.0" style="-fx-font-size: 14; -fx-padding: 10; -fx-background-color: #4db8ff; -fx-text-fill: white; -fx-cursor: hand;" text="Iniciar sesión" />
+        </VBox>
+    </left>
+
+    <!-- RIGHT: Formulario de login -->
+    <center>
+        <VBox alignment="CENTER" prefWidth="550.0" spacing="25.0" style="-fx-background-color: #1a1a2e; -fx-padding: 40;">
+            <padding>
+                <Insets bottom="40.0" left="50.0" right="50.0" top="40.0" />
+            </padding>
+
+
+            <!-- Título -->
+            <Label text="Iniciar Sesión" textFill="#FFFFFF">
+                <font>
+                    <Font name="System Bold" size="32.0" />
+                </font>
+            </Label>
+
+            <Label text="Accede a tu cuenta para jugar" textFill="#B0B0B0">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
+
+            <!-- Email -->
+            <VBox spacing="8.0">
+                <Label text="📧 Email" textFill="#FFFFFF">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+                <TextField fx:id="emailField" prefHeight="45.0" promptText="tu.email@ejemplo.com" style="-fx-font-size: 14; -fx-padding: 12; -fx-border-radius: 5; -fx-background-color: #2D2D44; -fx-text-fill: #FFFFFF; -fx-prompt-text-fill: #666666; -fx-border-color: #00D4FF; -fx-border-width: 0 0 2 0;" />
+            </VBox>
+
+            <!-- Contraseña -->
+            <VBox spacing="8.0">
+                <Label text="🔐 Contraseña" textFill="#FFFFFF">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+                <PasswordField fx:id="passwordField" prefHeight="45.0" promptText="Tu contraseña" style="-fx-font-size: 14; -fx-padding: 12; -fx-border-radius: 5; -fx-background-color: #2D2D44; -fx-text-fill: #FFFFFF; -fx-prompt-text-fill: #666666; -fx-border-color: #00D4FF; -fx-border-width: 0 0 2 0;" />
+            </VBox>
+
+            <!-- Mensaje de error/éxito -->
+            <Label fx:id="statusLabel" textFill="#FF6B6B" wrapText="true" style="-fx-font-size: 13;">
+                <font>
+                    <Font size="13.0" />
+                </font>
+            </Label>
+
+            <!-- Botón Login -->
+            <Button onAction="#onLoginClicked" prefHeight="50.0" prefWidth="200.0" style="-fx-font-size: 15; -fx-padding: 12; -fx-background-color: #00D4FF; -fx-text-fill: #000000; -fx-cursor: hand; -fx-font-weight: bold; -fx-border-radius: 5;" text="Iniciar Sesión">
+                <font>
+                    <Font name="System Bold" size="15.0" />
+                </font>
+            </Button>
+
+            <!-- Separador -->
             <HBox alignment="CENTER" spacing="10.0">
-                <Button onAction="#onClearClicked" prefHeight="35.0" prefWidth="100.0" style="-fx-font-size: 12; -fx-padding: 8; -fx-background-color: #333333; -fx-text-fill: #cccccc; -fx-cursor: hand;" text="Limpiar" />
-                <Button fx:id="registerButton" onAction="#onRegisterClicked" prefHeight="35.0" prefWidth="100.0" style="-fx-font-size: 12; -fx-padding: 8; -fx-background-color: #228B22; -fx-text-fill: white; -fx-cursor: hand;" text="Registrarse" />
+                <Separator HBox.hgrow="ALWAYS" />
+                <Label text="O" textFill="#666666" style="-fx-font-size: 12;" />
+                <Separator HBox.hgrow="ALWAYS" />
             </HBox>
-            <Label text="¿No tienes cuenta? Haz clic en Registrarse" textFill="#999999">
+
+            <!-- Botones secundarios -->
+            <HBox alignment="CENTER" spacing="15.0">
+                <Button fx:id="registerButton" onAction="#onRegisterClicked" prefHeight="45.0" prefWidth="180.0" style="-fx-font-size: 13; -fx-padding: 10; -fx-background-color: #228B22; -fx-text-fill: white; -fx-cursor: hand; -fx-border-radius: 5; -fx-font-weight: bold;" text="📝 Registrarse" />
+                <Button onAction="#onClearClicked" prefHeight="45.0" prefWidth="180.0" style="-fx-font-size: 13; -fx-padding: 10; -fx-background-color: #555555; -fx-text-fill: #CCCCCC; -fx-cursor: hand; -fx-border-radius: 5;" text="🗑️ Limpiar" />
+            </HBox>
+
+            <!-- Pie de página -->
+            <Label text="¿No tienes cuenta? Haz clic en Registrarse para crear una" textFill="#888888" wrapText="true">
                 <font>
-                    <Font size="10.0" />
+                    <Font size="11.0" />
                 </font>
             </Label>
         </VBox>
     </center>
 </BorderPane>
-

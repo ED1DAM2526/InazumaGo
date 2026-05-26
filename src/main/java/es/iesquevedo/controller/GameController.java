@@ -9,12 +9,16 @@ import es.iesquevedo.service.impl.GameServiceImpl;
 import es.iesquevedo.service.impl.InazumaGoMoveValidator;
 import es.iesquevedo.exception.InvalidMoveException;
 import es.iesquevedo.exception.PlayerNotInTurnException;
+import es.iesquevedo.config.AppState;
+import es.iesquevedo.repository.firebase.FirebaseMainRepository;
+import es.iesquevedo.dto.GameDto;
 
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.RadialGradient;
@@ -41,6 +45,8 @@ public class GameController {
     @FXML private Label currentTurnLabel;
     @FXML private Label statusLabel;
     @FXML private Canvas boardCanvas;
+    @FXML private VBox player1Box;
+    @FXML private VBox player2Box;
 
     private String player1Name = "Jugador 1";
     private String player2Name = "Jugador 2";
@@ -55,6 +61,12 @@ public class GameController {
     private Game game;
     private InazumaGoMoveValidator moveValidator;
     private boolean moveInProgress = false;
+    
+    // Multiplayer Firebase
+    private FirebaseMainRepository firebaseRepository;
+    private String currentGameId;
+    private String currentPlayerEmail;
+    private String sseListenerId;
 
     @FXML
     public void initialize() {
@@ -62,6 +74,17 @@ public class GameController {
         
         // Inicializar validador de movimientos
         moveValidator = new InazumaGoMoveValidator();
+        
+        // NO crear juego local aquí - esperar a que se llame initMultiplayerGame()
+        // o createLocalGame() si es necesario
+        boardCanvas.setOnMouseClicked(this::onBoardClick);
+    }
+    
+    /**
+     * Crea un juego local (para use solo si no se inicia desde Firebase)
+     */
+    private void createLocalGame() {
+        LOGGER.log(Level.INFO, "Creando juego local");
         
         // Crear juego con dos jugadores locales
         Player player1 = new Player("1", player1Name);
@@ -73,8 +96,118 @@ public class GameController {
         
         updatePlayerInfo();
         drawBoard();
+        startGameTimer();
+    }
+
+    /**
+     * Inicializa partida multijugador desde Firebase.
+     * Se llama desde MatchingScreenController cuando se une a una partida.
+     */
+    public void initMultiplayerGame(String gameId, String playerEmail, String firebaseUrl) {
+        LOGGER.log(Level.INFO, "Iniciando partida multijugador: " + gameId + " para: " + playerEmail);
+        
+        this.currentGameId = gameId;
+        this.currentPlayerEmail = playerEmail;
+        this.firebaseRepository = new FirebaseMainRepository(firebaseUrl);
+        
+        // Configurar token
+        String token = AppState.getInstance().getAuthToken();
+        if (token != null) {
+            firebaseRepository.setIdToken(token);
+        }
+        
+        // Cargar documento de Firebase
+        firebaseRepository.getGame(gameId)
+            .thenAccept(gameDto -> {
+                if (gameDto != null) {
+                    javafx.application.Platform.runLater(() -> {
+                        initializeFromFirebase(gameDto);
+                        openSSEListener();
+                    });
+                } else {
+                    LOGGER.log(Level.WARNING, "Juego no encontrado: " + gameId);
+                }
+            })
+            .exceptionally(ex -> {
+                LOGGER.log(Level.SEVERE, "Error cargando juego: " + ex.getMessage());
+                return null;
+            });
+    }
+
+    private void initializeFromFirebase(GameDto gameDto) {
+        // Crear modelo de juego desde DTO
+        Player player1 = new Player(gameDto.getBlackPlayer(), "Negro");
+        Player player2 = new Player(gameDto.getWhitePlayer(), "Blanco");
+        
+        game = new Game(currentGameId, player1);
+        game.addPlayer(player2);
+        game.start();
+        
+        // 🔧 RESTAURAR EL TURNO ACTUAL DESDE EL DTO
+        if (gameDto.getCurrentTurn() != null) {
+            int expectedPlayerIndex = "white".equals(gameDto.getCurrentTurn()) ? 1 : 0;
+            // Cambiar al índice correcto
+            while (game.getCurrentPlayerIndex() != expectedPlayerIndex) {
+                game.nextTurn();
+            }
+        }
+        
+        // Restaurar el estado del tablero desde el DTO
+        if (gameDto.getBoard() != null) {
+            int[][] boardState = gameDto.getBoard();
+            Board board = game.getBoard();
+            for (int r = 0; r < 9; r++) {
+                for (int c = 0; c < 9; c++) {
+                    int cell = boardState[r][c];
+                    board.placeStone(r, c, cell);
+                }
+            }
+        }
+        
+        // Configurar nombres
+        player1Name = gameDto.getBlackPlayer().equals(currentPlayerEmail) ? "TÚ (Negro)" : "Oponente (Negro)";
+        player2Name = gameDto.getWhitePlayer().equals(currentPlayerEmail) ? "TÚ (Blanco)" : "Oponente (Blanco)";
+        
+        updatePlayerInfo();
+        drawBoard();
         boardCanvas.setOnMouseClicked(this::onBoardClick);
         startGameTimer();
+    }
+
+    private void openSSEListener() {
+        sseListenerId = firebaseRepository.openSSEListener(currentGameId, updatedGame -> {
+            javafx.application.Platform.runLater(() -> {
+                // Actualizar el modelo de juego desde Firebase
+                LOGGER.log(Level.INFO, "Actualizacion recibida de Firebase");
+                
+                if (updatedGame != null) {
+                    // Restaurar el turno actual desde Firebase
+                    if (updatedGame.getCurrentTurn() != null) {
+                        int expectedPlayerIndex = "white".equals(updatedGame.getCurrentTurn()) ? 1 : 0;
+                        // Cambiar al índice correcto
+                        while (game.getCurrentPlayerIndex() != expectedPlayerIndex) {
+                            game.nextTurn();
+                        }
+                    }
+                    
+                    // Restaurar el estado del tablero desde el DTO
+                    if (updatedGame.getBoard() != null) {
+                        int[][] boardState = updatedGame.getBoard();
+                        Board board = game.getBoard();
+                        for (int r = 0; r < 9; r++) {
+                            for (int c = 0; c < 9; c++) {
+                                int cell = boardState[r][c];
+                                board.placeStone(r, c, cell);
+                            }
+                        }
+                    }
+                }
+                
+                drawBoard();
+                updatePlayerInfo();
+            });
+        });
+        LOGGER.log(Level.INFO, "SSE Listener abierto: " + sseListenerId);
     }
 
     private void updatePlayerInfo() {
@@ -108,8 +241,21 @@ public class GameController {
 
     private void updateCurrentTurn() {
         Player currentPlayer = game.getCurrentPlayer();
+        int playerIndex = game.getCurrentPlayerIndex();
+        String colorText = playerIndex == 0 ? "Negro ⚫" : "Blanco ⚪";
         String turn = currentPlayer != null ? currentPlayer.getName() : player1Name;
-        currentTurnLabel.setText("Turno: " + turn);
+        currentTurnLabel.setText("📍 Turno: " + colorText);
+        
+        // Resaltar el jugador en turno con fondo destacado
+        if (playerIndex == 0) {
+            // Negro está en turno
+            player1Box.setStyle("-fx-border-color: #FFD700; -fx-border-width: 4; -fx-padding: 15; -fx-border-radius: 8; -fx-background-color: #FFFACD;");
+            player2Box.setStyle("-fx-border-color: #CCCCCC; -fx-border-width: 3; -fx-padding: 15; -fx-background-color: #F5F5F5; -fx-border-radius: 8;");
+        } else {
+            // Blanco está en turno
+            player2Box.setStyle("-fx-border-color: #FFD700; -fx-border-width: 4; -fx-padding: 15; -fx-border-radius: 8; -fx-background-color: #FFFACD;");
+            player1Box.setStyle("-fx-border-color: #333333; -fx-border-width: 3; -fx-padding: 15; -fx-border-radius: 8; -fx-background-color: #F0F0F0;");
+        }
     }
 
     private void drawBoard() {
@@ -340,6 +486,14 @@ public class GameController {
         moveInProgress = true;
         
         try {
+            // ✅ VALIDACIÓN CRÍTICA: Solo el jugador actual puede mover
+            if (!currentPlayerEmail.equals(game.getCurrentPlayer().getId())) {
+                statusLabel.setText("❌ No es tu turno. Es el turno de: " + game.getCurrentPlayer().getName());
+                moveInProgress = false;
+                LOGGER.log(Level.WARNING, "Intento de mover fuera de turno: " + currentPlayerEmail + " vs " + game.getCurrentPlayer().getId());
+                return;
+            }
+            
             Player currentPlayer = game.getCurrentPlayer();
             
             if (currentPlayer == null) {
@@ -379,7 +533,7 @@ public class GameController {
             game.setLastBoardState(previousBoardState);
             
             // Movimiento exitoso
-            statusLabel.setText("Movimiento realizado" + (capturedCount > 0 ? " (" + capturedCount + " piedras capturadas)" : ""));
+            statusLabel.setText("✅ Movimiento realizado" + (capturedCount > 0 ? " (" + capturedCount + " piedras capturadas)" : ""));
             
             // Cambiar turno
             game.nextTurn();
@@ -387,19 +541,74 @@ public class GameController {
             
             updatePlayerInfo();
             drawBoard();
+            
+            // 🔥 GUARDAR EN FIREBASE
+            saveGameToFirebase();
+            
             moveInProgress = false;
             
             LOGGER.log(Level.INFO, "Piedra colocada en [" + row + "," + col + "], capturadas: " + capturedCount);
             
         } catch (InvalidMoveException | PlayerNotInTurnException ex) {
-            statusLabel.setText("Movimiento inválido: " + ex.getMessage());
+            statusLabel.setText("❌ Movimiento inválido: " + ex.getMessage());
             moveInProgress = false;
             LOGGER.log(Level.WARNING, "Error en movimiento: " + ex.getMessage());
         } catch (Exception ex) {
-            statusLabel.setText("Error: " + ex.getMessage());
+            statusLabel.setText("❌ Error: " + ex.getMessage());
             moveInProgress = false;
             LOGGER.log(Level.SEVERE, "Error inesperado en movimiento: " + ex.getMessage());
         }
+    }
+    
+    /**
+     * Guarda el estado actual del juego en Firebase
+     */
+    private void saveGameToFirebase() {
+        if (firebaseRepository == null || currentGameId == null) {
+            LOGGER.log(Level.WARNING, "No se puede guardar: firebase no inicializado");
+            return;
+        }
+        
+        // Convertir Game model a GameDto
+        GameDto gameDto = convertGameToDto();
+        
+        firebaseRepository.updateGame(currentGameId, gameDto)
+            .thenAccept(updated -> {
+                LOGGER.log(Level.INFO, "Juego guardado en Firebase");
+            })
+            .exceptionally(ex -> {
+                LOGGER.log(Level.SEVERE, "Error guardando juego en Firebase: " + ex.getMessage());
+                statusLabel.setText("⚠️ Error sincronizando con Firebase");
+                return null;
+            });
+    }
+    
+    /**
+     * Convierte el modelo Game al DTO para guardar en Firebase
+     */
+    private GameDto convertGameToDto() {
+        GameDto dto = new GameDto();
+        dto.setId(currentGameId);
+        dto.setBlackPlayer(game.getPlayers().get(0).getId());
+        dto.setWhitePlayer(game.getPlayers().get(1).getId());
+        
+        // Copiar el tablero como int[][]
+        Board board = game.getBoard();
+        int[][] boardState = new int[9][9];
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                boardState[r][c] = board.getCell(r, c);
+            }
+        }
+        dto.setBoard(boardState);
+        
+        // Estado del juego
+        String gameState = game.getState().toString();
+        dto.setStatus(gameState);
+        dto.setCurrentTurn(game.getCurrentPlayerIndex() == 0 ? "black" : "white");
+        dto.setCreatedAt(System.currentTimeMillis());
+        
+        return dto;
     }
 
     @FXML
@@ -421,8 +630,13 @@ public class GameController {
             // Crear movimiento de PASE
             Move move = new Move(currentPlayer.getId(), true); // PASE
             
-            // Validar (pasadas sin validación especial)
-            moveValidator.validateMove(game, move);
+            try {
+                // Validar (pasadas sin validación especial)
+                moveValidator.validateMove(game, move);
+            } catch (Exception validationEx) {
+                LOGGER.log(Level.WARNING, "Validación de pase fallida: " + validationEx.getMessage());
+                // Continuar de todas formas - es solo un pase
+            }
             
             // Registrar pase
             game.getMoves().add(move);
@@ -443,8 +657,16 @@ public class GameController {
             
             LOGGER.log(Level.INFO, "Turno pasado. Pases consecutivos: " + game.getConsecutivePasses());
         } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Error crítico en onPassTurn: " + ex.getMessage());
             statusLabel.setText("Error al pasar: " + ex.getMessage());
             moveInProgress = false;
+            // Intentar avanzar el turno de todas formas
+            try {
+                game.nextTurn();
+                updateCurrentTurn();
+            } catch (Exception retryEx) {
+                LOGGER.log(Level.SEVERE, "Error al recuperar del fallo en pase: " + retryEx.getMessage());
+            }
         }
     }
 
@@ -466,6 +688,31 @@ public class GameController {
         
         statusLabel.setText(winner.getName() + " ganó. " + loser.getName() + " se rindió");
         LOGGER.log(Level.INFO, loser.getName() + " se rindió. Ganador: " + winner.getName());
+        
+        // Mostrar diálogo de victoria
+        showVictoryDialog(winner.getName(), loser.getName());
+    }
+    
+    private void showVictoryDialog(String winnerName, String loserName) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle("¡Partida Finalizada!");
+        alert.setHeaderText("🏆 " + winnerName + " Ha Ganado 🏆");
+        alert.setContentText(loserName + " se rindió.\n\n¿Deseas buscar otra partida?\nPulsa OK para volver al menú.");
+        alert.setOnCloseRequest(e -> onBackToMenu());
+        
+        // Customizar el botón OK
+        javafx.scene.control.ButtonType okButton = alert.getButtonTypes().get(0);
+        javafx.scene.control.Button button = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okButton);
+        if (button != null) {
+            button.setText("Volver al Menú");
+            button.setStyle("-fx-font-size: 12; -fx-padding: 8;");
+        }
+        
+        alert.showAndWait().ifPresent(result -> {
+            if (result == okButton) {
+                onBackToMenu();
+            }
+        });
     }
 
     @FXML
@@ -482,11 +729,20 @@ public class GameController {
 
             es.iesquevedo.ui.MatchingScreenController controller = loader.getController();
             controller.setGameService(new GameServiceImpl());
-            controller.startMatching(new Player(matchingPlayerName, matchingPlayerName));
+            
+            // Obtener email del usuario autenticado
+            String userEmail = AppState.getInstance().getCurrentUserEmail();
+            if (userEmail == null || userEmail.isEmpty()) {
+                userEmail = matchingPlayerName; // fallback al nombre si no hay email
+            }
+            String playerName = buildDisplayName(userEmail);
+            
+            controller.startMatching(new Player(userEmail, playerName));
 
             javafx.stage.Stage stage = (javafx.stage.Stage) boardCanvas.getScene().getWindow();
-            stage.setScene(new javafx.scene.Scene(root, 500, 300));
+            stage.setScene(new javafx.scene.Scene(root, 1200, 800));
             stage.setTitle("InazumaGo - Emparejamiento");
+            stage.setMaximized(true);
             stage.show();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al volver al emparejamiento", e);
@@ -627,6 +883,14 @@ public class GameController {
             gc.fillText(number, boardStartX - offset, y);
             gc.fillText(number, boardEndX + offset, y);
         }
+    }
+    
+    private String buildDisplayName(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return "Jugador";
+        }
+        int atIndex = email.indexOf('@');
+        return atIndex > 0 ? email.substring(0, atIndex) : email;
     }
 }
 

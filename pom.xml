@@ -45,11 +45,6 @@
             <version>2.35.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.google.firebase</groupId>
-            <artifactId>firebase-admin</artifactId>
-            <version>9.8.0</version>
-        </dependency>
 
         <!-- HTTP Client -->
         <dependency>

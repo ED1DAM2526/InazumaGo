@@ -9,6 +9,12 @@ public class GameDto {
     private String status; // "WAITING", "IN_PROGRESS", "FINISHED"
     private long createdAt;
     private List<MoveData> moves;
+    
+    // Multiplayer fields
+    private String blackPlayer;
+    private String whitePlayer;
+    private String currentTurn;
+    private int[][] board;
 
     // Constructores
     public GameDto() {}
@@ -39,5 +45,17 @@ public class GameDto {
 
     public List<MoveData> getMoves() { return moves; }
     public void setMoves(List<MoveData> moves) { this.moves = moves; }
+    
+    public String getBlackPlayer() { return blackPlayer; }
+    public void setBlackPlayer(String blackPlayer) { this.blackPlayer = blackPlayer; }
+    
+    public String getWhitePlayer() { return whitePlayer; }
+    public void setWhitePlayer(String whitePlayer) { this.whitePlayer = whitePlayer; }
+    
+    public String getCurrentTurn() { return currentTurn; }
+    public void setCurrentTurn(String currentTurn) { this.currentTurn = currentTurn; }
+    
+    public int[][] getBoard() { return board; }
+    public void setBoard(int[][] board) { this.board = board; }
 
 }

@@ -1,15 +1,21 @@
 package es.iesquevedo.controller;
 
 import es.iesquevedo.config.AppState;
-import es.iesquevedo.service.auth.AuthService;
+import es.iesquevedo.service.AuthService;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import es.iesquevedo.util.EmailUtils;
 
 /**
  * Controlador para la pantalla de login.
@@ -27,6 +33,10 @@ public class LoginController {
     @FXML
     private Label statusLabel;
 
+    @FXML
+    private Button registerButton;
+
+
     private AuthService authService;
     private AppState appState;
 
@@ -35,6 +45,26 @@ public class LoginController {
      */
     public LoginController() {
         this.appState = AppState.getInstance();
+    }
+
+    /**
+     * Se llama después de que FXML carga el layout.
+     * Configura los listeners de teclado.
+     */
+    @FXML
+    public void initialize() {
+        // Permitir que Enter en emailField y passwordField dispare el login
+        emailField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                onLoginClicked();
+            }
+        });
+        
+        passwordField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                onLoginClicked();
+            }
+        });
     }
 
     /**
@@ -66,6 +96,13 @@ public class LoginController {
             return;
         }
 
+        // Validar formato de email (asegura que contenga '@' y estructura básica)
+        if (!EmailUtils.isValidEmail(email)) {
+            updateStatus("El email no tiene un formato válido. Ej: usuario@ejemplo.com", "error");
+            LOGGER.log(Level.WARNING, "Intento de login con email inválido: " + email);
+            return;
+        }
+
         if (password == null || password.trim().isEmpty()) {
             updateStatus("La contraseña no puede estar vacía", "error");
             LOGGER.log(Level.WARNING, "Intento de login sin contraseña");
@@ -80,27 +117,99 @@ public class LoginController {
                 return;
             }
 
-            String token = authService.login(email, password);
+            authService.login(email, password)
+                .thenAccept(token -> {
+                    javafx.application.Platform.runLater(() -> {
+                        // Guardar token en AppState
+                        appState.setAuthToken(token);
+                        appState.setCurrentUserEmail(email);
+                        
+                        // Log para debuguear
+                        LOGGER.log(Level.INFO, "Token guardado en AppState: " + (token != null ? "SÍ" : "NO"));
 
-            // Guardar token en AppState
-            appState.setAuthToken(token);
-            appState.setCurrentUserEmail(email);
+                        // Mostrar éxito
+                        updateStatus("✓ Login exitoso. Bienvenido, " + email, "success");
+                        LOGGER.log(Level.INFO, "Login exitoso para: " + email);
 
-            // Mostrar éxito
-            updateStatus("✓ Login exitoso. Bienvenido, " + email, "success");
-            LOGGER.log(Level.INFO, "Login exitoso para: " + email);
+                        // Limpiar campos
+                        emailField.clear();
+                        passwordField.clear();
 
-            // Limpiar campos
-            emailField.clear();
-            passwordField.clear();
-
-            // Nota: En una app real aquí navegerías a la pantalla principal
-            // Por ahora solo mostramos el mensaje de éxito
+                        // Navegar al menú principal
+                        navigateToMainMenu(email);
+                    });
+                })
+                .exceptionally(ex -> {
+                    javafx.application.Platform.runLater(() -> {
+                        updateStatus("✗ Error de login: " + ex.getMessage(), "error");
+                        LOGGER.log(Level.WARNING, "Error en login: " + ex.getMessage());
+                    });
+                    return null;
+                });
 
         } catch (Exception e) {
             updateStatus("✗ Error de login: " + e.getMessage(), "error");
             LOGGER.log(Level.WARNING, "Error en login: " + e.getMessage());
         }
+    }
+
+    /**
+     * Navega al menú principal después del login exitoso.
+     *
+     * @param playerEmail email del jugador autenticado
+     */
+    private void navigateToMainMenu(String playerEmail) {
+        try {
+            FXMLLoader mainMenuLoader = new FXMLLoader(getClass().getResource("/fxml/MainMenu.fxml"));
+            Parent mainMenuRoot = mainMenuLoader.load();
+
+            es.iesquevedo.controller.MainMenuController mainMenuController = mainMenuLoader.getController();
+            mainMenuController.setPlayerEmail(playerEmail);
+            
+            Scene scene = emailField.getScene();
+            scene.setRoot(mainMenuRoot);
+            javafx.stage.Stage stage = (javafx.stage.Stage) scene.getWindow();
+            stage.setTitle("InazumaGo - Menú Principal");
+            
+            LOGGER.log(Level.INFO, "Navegado al menú principal para: " + playerEmail);
+        } catch (Exception e) {
+            updateStatus("✗ Error al cargar menú principal: " + e.getMessage(), "error");
+            LOGGER.log(Level.SEVERE, "Error al cargar MainMenu.fxml: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Navega a la pantalla de emparejamiento después del login exitoso.
+     *
+     * @param playerEmail email del jugador autenticado
+     */
+    private void navigateToMatching(String playerEmail) {
+        try {
+            FXMLLoader matchingLoader = new FXMLLoader(getClass().getResource("/fxml/MatchingScreen.fxml"));
+            Parent matchingRoot = matchingLoader.load();
+
+            es.iesquevedo.ui.MatchingScreenController matchingController = matchingLoader.getController();
+            String playerName = buildDisplayName(playerEmail);
+            matchingController.startMatching(new es.iesquevedo.model.Player(playerEmail, playerName));
+            
+            Scene scene = emailField.getScene();
+            scene.setRoot(matchingRoot);
+            javafx.stage.Stage stage = (javafx.stage.Stage) scene.getWindow();
+            stage.setTitle("InazumaGo - Emparejamiento");
+            
+            LOGGER.log(Level.INFO, "Navegado a pantalla de emparejamiento para: " + playerEmail);
+        } catch (Exception e) {
+            updateStatus("✗ Error al cargar pantalla de emparejamiento: " + e.getMessage(), "error");
+            LOGGER.log(Level.SEVERE, "Error al cargar MatchingScreen.fxml: " + e.getMessage());
+        }
+    }
+
+    private String buildDisplayName(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return "Jugador";
+        }
+        int atIndex = email.indexOf('@');
+        return atIndex > 0 ? email.substring(0, atIndex) : email;
     }
 
     /**
@@ -113,6 +222,7 @@ public class LoginController {
         statusLabel.setText("");
         LOGGER.log(Level.INFO, "Campos limpiados");
     }
+
 
     /**
      * Actualiza el label de estado con mensaje y color.
@@ -131,6 +241,27 @@ public class LoginController {
             LOGGER.log(Level.INFO, "Mensaje de error: " + message);
         } else {
             statusLabel.setTextFill(Color.BLACK);
+        }
+    }
+
+    /**
+     * Navega a la pantalla de registro.
+     */
+    @FXML
+    public void onRegisterClicked() {
+        try {
+            FXMLLoader registerLoader = new FXMLLoader(getClass().getResource("/fxml/Register.fxml"));
+            Parent registerRoot = registerLoader.load();
+            
+            Scene scene = emailField.getScene();
+            scene.setRoot(registerRoot);
+            Stage stage = (Stage) scene.getWindow();
+            stage.setTitle("InazumaGo - Registro");
+            
+            LOGGER.log(Level.INFO, "Navegado a pantalla de registro");
+        } catch (Exception e) {
+            updateStatus("✗ Error al cargar pantalla de registro: " + e.getMessage(), "error");
+            LOGGER.log(Level.SEVERE, "Error al cargar Register.fxml: " + e.getMessage());
         }
     }
 }

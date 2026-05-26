@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="es.iesquevedo.ui.MatchingScreenController"
+            style="-fx-background-color: linear-gradient(to right, #1a1a2e, #16213e);">
+
+    <!-- TOP: Header -->
+    <top>
+        <VBox spacing="0" style="-fx-background-color: linear-gradient(to right, #0f3460, #1a1a2e); -fx-padding: 20;">
+            <HBox spacing="20" alignment="CENTER_LEFT">
+                <Label text="🎮 InazumaGo" textFill="#FFFFFF" style="-fx-font-size: 32; -fx-font-weight: bold;"/>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label text="⚡ Emparejamiento en vivo" textFill="#00D4FF" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+            </HBox>
+            <Separator style="-fx-border-color: #00D4FF; -fx-border-width: 2 0 0 0;" />
+        </VBox>
+    </top>
+
+    <!-- CENTER: Contenido principal -->
+    <center>
+        <VBox spacing="40" alignment="CENTER" style="-fx-padding: 60;">
+
+            <!-- Título -->
+            <Label text="Buscando oponente..." textFill="#FFFFFF" style="-fx-font-size: 36; -fx-font-weight: bold;"/>
+
+            <!-- Animación de búsqueda -->
+            <VBox alignment="CENTER" spacing="20">
+                <ProgressIndicator prefWidth="80" prefHeight="80" style="-fx-accent: #00D4FF;"/>
+                <Label fx:id="statusLabel" text="Pulsa 'Buscar partida' para iniciar la búsqueda."
+                       textFill="#B0B0B0" wrapText="true" style="-fx-font-size: 16;" alignment="CENTER"
+                       maxWidth="500"/>
+            </VBox>
+
+            <!-- Tiempo transcurrido -->
+            <Label fx:id="timeLabel" text="Tiempo de espera: 0s" textFill="#00D4FF"
+                   style="-fx-font-size: 18; -fx-font-weight: bold;" alignment="CENTER"/>
+
+            <!-- Divider -->
+            <Separator style="-fx-border-color: #00D4FF; -fx-border-width: 1 0 0 0; -fx-max-width: 300;" />
+
+        </VBox>
+    </center>
+
+    <!-- BOTTOM: Botones de control -->
+    <bottom>
+        <VBox spacing="15" style="-fx-background-color: linear-gradient(to right, #0f3460, #1a1a2e); -fx-padding: 20;" alignment="CENTER">
+            <HBox spacing="20" alignment="CENTER">
+                <Button fx:id="searchButton" text="🔍 Buscar Partida" onAction="#onSearchClicked"
+                        prefHeight="50" prefWidth="200"
+                        style="-fx-background-color: #00D4FF; -fx-text-fill: #000000; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-radius: 5;" />
+                <Button fx:id="cancelButton" text="❌ Cancelar" onAction="#onCancel"
+                        prefHeight="50" prefWidth="200"
+                        style="-fx-background-color: #FF6B6B; -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-radius: 5;" />
+            </HBox>
+            <Separator style="-fx-border-color: #00D4FF; -fx-border-width: 2 0 0 0;" />
+            <Label text="InazumaGo 2026 - El Go Moderno" textFill="#666666" style="-fx-font-size: 11;" alignment="CENTER"/>
+        </VBox>
+    </bottom>
+
+</BorderPane>

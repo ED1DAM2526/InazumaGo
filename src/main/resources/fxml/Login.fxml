@@ -1,59 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="es.iesquevedo.controller.LoginController">
-    <padding>
-        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0"/>
-    </padding>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: linear-gradient(to right, #1a1a2e, #16213e);" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="es.iesquevedo.controller.LoginController">
 
-    <!-- Título -->
-    <Label text="InazumaGo" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
-    <Label text="Iniciar sesión" style="-fx-font-size: 16; -fx-text-fill: #666666;"/>
+    <!-- LEFT: Logo y descripción -->
+    <left>
+        <VBox alignment="TOP_CENTER" prefWidth="350.0" spacing="30.0" style="-fx-background-color: linear-gradient(to bottom, #0f3460, #1a1a2e); -fx-padding: 40;">
+            <padding>
+                <Insets bottom="40.0" left="30.0" right="30.0" top="80.0" />
+            </padding>
 
-    <!-- Espaciador -->
-    <VBox spacing="5.0" VBox.vgrow="SOMETIMES"/>
+            <Label text="🎮 InazumaGo" textFill="#FFFFFF">
+                <font>
+                    <Font name="System Bold" size="48.0" />
+                </font>
+            </Label>
 
-    <!-- Campo Email -->
-    <Label text="Email:" style="-fx-font-size: 12; -fx-text-fill: #333333;"/>
-    <TextField fx:id="emailField" promptText="tu.email@ejemplo.com"
-               style="-fx-font-size: 12;"/>
+            <Label text="El Go moderno" textFill="#E0E0E0">
+                <font>
+                    <Font name="System Bold" size="18.0" />
+                </font>
+            </Label>
 
-    <!-- Campo Contraseña -->
-    <Label text="Contraseña:" style="-fx-font-size: 12; -fx-text-fill: #333333;"/>
-    <PasswordField fx:id="passwordField" promptText="Tu contraseña"
-                   style="-fx-font-size: 12;"/>
+            <Separator style="-fx-border-color: #00D4FF; -fx-border-width: 2 0 0 0; -fx-padding: 0;" />
 
-    <!-- Espaciador -->
-    <VBox spacing="5.0" VBox.vgrow="SOMETIMES"/>
+            <VBox spacing="20.0">
+                <Label text="✨ Juega en tiempo real" textFill="#B0E0E6">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+                <Label text="⚡ Partidas rápidas" textFill="#B0E0E6">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+                <Label text="🌍 Juega con otros" textFill="#B0E0E6">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+                <Label text="🏆 Juega gratis" textFill="#B0E0E6">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+            </VBox>
+        </VBox>
+    </left>
 
-    <!-- Botones -->
-    <HBox spacing="10.0" alignment="CENTER">
-        <Button text="Iniciar sesión" onAction="#onLoginClicked"
-                style="-fx-padding: 10px 30px; -fx-font-size: 12; -fx-font-weight: bold;"
-                HBox.hgrow="SOMETIMES"/>
-        <Button text="Limpiar" onAction="#onClearClicked"
-                style="-fx-padding: 10px 20px; -fx-font-size: 12;"
-                HBox.hgrow="SOMETIMES"/>
-    </HBox>
+    <!-- RIGHT: Formulario de login -->
+    <center>
+        <VBox alignment="CENTER" prefWidth="550.0" spacing="25.0" style="-fx-background-color: #1a1a2e; -fx-padding: 40;">
+            <padding>
+                <Insets bottom="40.0" left="50.0" right="50.0" top="40.0" />
+            </padding>
 
-    <!-- Label de estado -->
-    <Label fx:id="statusLabel" text=""
-           style="-fx-font-size: 12; -fx-text-fill: #333333;"
-           wrapText="true"/>
 
-    <!-- Espaciador final -->
-    <VBox spacing="5.0" VBox.vgrow="SOMETIMES"/>
+            <!-- Título -->
+            <Label text="Iniciar Sesión" textFill="#FFFFFF">
+                <font>
+                    <Font name="System Bold" size="32.0" />
+                </font>
+            </Label>
 
-    <!-- Footer de información -->
-    <Label text="Demo: Usa cualquier email y contraseña"
-            style="-fx-font-size: 10; -fx-text-fill: #999999;"/>
-</VBox>
+            <Label text="Accede a tu cuenta para jugar" textFill="#B0B0B0">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
 
+            <!-- Email -->
+            <VBox spacing="8.0">
+                <Label text="📧 Email" textFill="#FFFFFF">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+                <TextField fx:id="emailField" prefHeight="45.0" promptText="tu.email@ejemplo.com" style="-fx-font-size: 14; -fx-padding: 12; -fx-border-radius: 5; -fx-background-color: #2D2D44; -fx-text-fill: #FFFFFF; -fx-prompt-text-fill: #666666; -fx-border-color: #00D4FF; -fx-border-width: 0 0 2 0;" />
+            </VBox>
+
+            <!-- Contraseña -->
+            <VBox spacing="8.0">
+                <Label text="🔐 Contraseña" textFill="#FFFFFF">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+                <PasswordField fx:id="passwordField" prefHeight="45.0" promptText="Tu contraseña" style="-fx-font-size: 14; -fx-padding: 12; -fx-border-radius: 5; -fx-background-color: #2D2D44; -fx-text-fill: #FFFFFF; -fx-prompt-text-fill: #666666; -fx-border-color: #00D4FF; -fx-border-width: 0 0 2 0;" />
+            </VBox>
+
+            <!-- Mensaje de error/éxito -->
+            <Label fx:id="statusLabel" textFill="#FF6B6B" wrapText="true" style="-fx-font-size: 13;">
+                <font>
+                    <Font size="13.0" />
+                </font>
+            </Label>
+
+            <!-- Botón Login -->
+            <Button onAction="#onLoginClicked" prefHeight="50.0" prefWidth="200.0" style="-fx-font-size: 15; -fx-padding: 12; -fx-background-color: #00D4FF; -fx-text-fill: #000000; -fx-cursor: hand; -fx-font-weight: bold; -fx-border-radius: 5;" text="Iniciar Sesión">
+                <font>
+                    <Font name="System Bold" size="15.0" />
+                </font>
+            </Button>
+
+            <!-- Separador -->
+            <HBox alignment="CENTER" spacing="10.0">
+                <Separator HBox.hgrow="ALWAYS" />
+                <Label text="O" textFill="#666666" style="-fx-font-size: 12;" />
+                <Separator HBox.hgrow="ALWAYS" />
+            </HBox>
+
+            <!-- Botones secundarios -->
+            <HBox alignment="CENTER" spacing="15.0">
+                <Button fx:id="registerButton" onAction="#onRegisterClicked" prefHeight="45.0" prefWidth="180.0" style="-fx-font-size: 13; -fx-padding: 10; -fx-background-color: #228B22; -fx-text-fill: white; -fx-cursor: hand; -fx-border-radius: 5; -fx-font-weight: bold;" text="📝 Registrarse" />
+                <Button onAction="#onClearClicked" prefHeight="45.0" prefWidth="180.0" style="-fx-font-size: 13; -fx-padding: 10; -fx-background-color: #555555; -fx-text-fill: #CCCCCC; -fx-cursor: hand; -fx-border-radius: 5;" text="🗑️ Limpiar" />
+            </HBox>
+
+            <!-- Pie de página -->
+            <Label text="¿No tienes cuenta? Haz clic en Registrarse para crear una" textFill="#888888" wrapText="true">
+                <font>
+                    <Font size="11.0" />
+                </font>
+            </Label>
+        </VBox>
+    </center>
+</BorderPane>

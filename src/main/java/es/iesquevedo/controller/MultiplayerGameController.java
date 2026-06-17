@@ -42,6 +42,8 @@ public class MultiplayerGameController {
     private static final Logger LOGGER = Logger.getLogger(MultiplayerGameController.class.getName());
     private static final int BOARD_SIZE = 9;
     private static final int CELL_SIZE = 50;
+    private static final long INITIAL_TIME_MS = 180_000; // 3 minutos por defecto
+    private static long testTimeMs = 0; // Para tests: 0 = usar INITIAL_TIME_MS, >0 = usar este valor
 
     @FXML private Label player1NameLabel;
     @FXML private Label player1ScoreLabel;
@@ -81,6 +83,10 @@ public class MultiplayerGameController {
         boardCanvas.setOnMouseClicked(this::onBoardClick);
     }
 
+    public static void setTestTimeMs(long timeMsForTest) {
+        testTimeMs = timeMsForTest;
+    }
+
     /**
      * Inicializa la partida multijugador.
      *
@@ -109,6 +115,7 @@ public class MultiplayerGameController {
                     setupPlayerInfo();
                     subscribeToRemoteUpdates();
                     drawBoard();
+                    initializeTimesForMultiplayer();
                     startGameTimer();
                 }
             });
@@ -147,12 +154,22 @@ public class MultiplayerGameController {
                 subscribeToRemoteUpdates();
                 drawBoard();
                 statusLabel.setText("Te has unido a la partida. Esperando que el otro jugador inicie...");
+                initializeTimesForMultiplayer();
+                startGameTimer();
             });
         }).exceptionally(ex -> {
             LOGGER.log(Level.SEVERE, "Error al unirse a partida", ex);
             statusLabel.setText("Error al unirse: " + ex.getMessage());
             return null;
         });
+    }
+
+    private void initializeTimesForMultiplayer() {
+        long initialTime = (testTimeMs > 0) ? testTimeMs : INITIAL_TIME_MS;
+        this.player1TimeMs = initialTime;
+        this.player2TimeMs = initialTime;
+        LOGGER.log(Level.INFO, "Tiempos iniciales multijugador: " + (initialTime / 1000) + "s cada uno");
+        updateTimeLabels();
     }
 
     /**
@@ -195,28 +212,38 @@ public class MultiplayerGameController {
      */
     private void applyRemoteMove(RemoteMoveDto remoteMove) {
         try {
+            // Si el juego no está en progreso o es nulo, ignorar
+            if (game == null || game.getState() != GameState.IN_PROGRESS) {
+                LOGGER.log(Level.FINE, "Ignorando remoteMove porque el juego no está en progreso o es nulo");
+                return;
+            }
+
             if (remoteMove.isPass()) {
-                game.nextTurn();
+                // Registrar pase primero (para mantener contador correcto si se reciben dos pases casi simultáneos)
                 game.incrementConsecutivePasses();
+                game.nextTurn();
                 statusLabel.setText(remoteMove.getPlayerName() + " pasó su turno");
 
+                // Si ambos pasaron, finalizar la partida — hacerlo idempotente
                 if (game.getConsecutivePasses() >= 2) {
-                    endGame();
+                    if (!gameEnded) {
+                        endGame();
+                    }
                 }
             } else {
                 Board board = game.getBoard();
-                int playerColor = game.getCurrentPlayer() != null && 
-                    game.getCurrentPlayer().getId().equals(remoteMove.getPlayerId()) ? 1 : 2;
-                
+                int playerColor = game.getCurrentPlayer() != null &&
+                        game.getCurrentPlayer().getId().equals(remoteMove.getPlayerId()) ? 1 : 2;
+
                 board.placeStone(remoteMove.getRow(), remoteMove.getCol(), playerColor);
                 int capturedCount = board.captureGroupsWithoutLiberties();
 
                 game.nextTurn();
                 game.resetConsecutivePasses();
 
-                statusLabel.setText(remoteMove.getPlayerName() + " colocó en [" + 
-                    remoteMove.getRow() + "," + remoteMove.getCol() + "]" + 
-                    (capturedCount > 0 ? " (" + capturedCount + " capturadas)" : ""));
+                statusLabel.setText(remoteMove.getPlayerName() + " colocó en [" +
+                        remoteMove.getRow() + "," + remoteMove.getCol() + "]" +
+                        (capturedCount > 0 ? " (" + capturedCount + " capturadas)" : ""));
             }
 
             updatePlayerInfo();
@@ -380,17 +407,24 @@ public class MultiplayerGameController {
             multiplayerService.sendRemoteMove(gameId, remotePass).thenAccept(v -> {
                 Platform.runLater(() -> {
                     try {
-                        game.nextTurn();
-                        game.incrementConsecutivePasses();
-                        statusLabel.setText(localPlayerName + " pasó su turno (Pases consecutivos: " + game.getConsecutivePasses() + ")");
+                        // Sólo aplicar cambios si la partida sigue en progreso (puede haber terminado por el remote)
+                        if (game != null && game.getState() == GameState.IN_PROGRESS) {
+                            game.incrementConsecutivePasses();
+                            game.nextTurn();
+                            statusLabel.setText(localPlayerName + " pasó su turno (Pases consecutivos: " + game.getConsecutivePasses() + ")");
 
-                        if (game.getConsecutivePasses() >= 2) {
-                            endGame();
+                            if (game.getConsecutivePasses() >= 2) {
+                                if (!gameEnded) {
+                                    endGame();
+                                }
+                            }
+
+                            updateCurrentTurn();
+                        } else {
+                            LOGGER.log(Level.FINE, "No se aplicó localmente el pase porque la partida ya no está en progreso");
                         }
-
-                        updateCurrentTurn();
                         moveInProgress = false;
-                        LOGGER.log(Level.INFO, "Turno pasado exitosamente. Pases: " + game.getConsecutivePasses());
+                        LOGGER.log(Level.INFO, "Turno pasado exitosamente. Pases: " + (game != null ? game.getConsecutivePasses() : -1));
                     } catch (Exception ex) {
                         LOGGER.log(Level.SEVERE, "Error después de recibir pase: " + ex.getMessage());
                         statusLabel.setText("Error actualizando turno: " + ex.getMessage());
@@ -402,10 +436,12 @@ public class MultiplayerGameController {
                     LOGGER.log(Level.SEVERE, "Error al enviar pase: " + ex.getMessage());
                     statusLabel.setText("Error al pasar turno: " + ex.getMessage());
                     moveInProgress = false;
-                    // Intentar recuperarse
+                    // Intentar recuperarse sólo si la partida sigue en progreso
                     try {
-                        game.nextTurn();
-                        updateCurrentTurn();
+                        if (game != null && game.getState() == GameState.IN_PROGRESS) {
+                            game.nextTurn();
+                            updateCurrentTurn();
+                        }
                     } catch (Exception retryEx) {
                         LOGGER.log(Level.SEVERE, "Error al recuperarse del fallo: " + retryEx.getMessage());
                     }
@@ -491,7 +527,9 @@ public class MultiplayerGameController {
 
     private void endGame() {
         gameEnded = true;
-        game.setState(GameState.FINISHED);
+        if (game != null) game.setState(GameState.FINISHED);
+        moveInProgress = false;
+        cleanupSubscriptions();
 
         Board board = game.getBoard();
         int blackStones = 0;
@@ -518,9 +556,9 @@ public class MultiplayerGameController {
         String winnerId = blackScore > whiteScore ? 
             game.getPlayers().get(0).getId() : game.getPlayers().get(1).getId();
         
-        multiplayerService.finishMultiplayerGame(gameId, winnerId).thenAccept(v -> {
-            LOGGER.log(Level.INFO, result);
-        });
+        if (multiplayerService != null && gameId != null) {
+            multiplayerService.finishMultiplayerGame(gameId, winnerId).thenAccept(v -> LOGGER.log(Level.INFO, result));
+        }
 
         stopGameTimer();
     }
@@ -610,9 +648,30 @@ public class MultiplayerGameController {
 
                 if (!gameEnded && game != null) {
                     if (game.getCurrentPlayerIndex() == 0) {
-                        player1TimeMs += elapsedNanos / 1_000_000;
+                        player1TimeMs -= elapsedNanos / 1_000_000;
+                        if (player1TimeMs <= 0) {
+                            player1TimeMs = 0;
+                            // Jugador 1 perdió por tiempo
+                            String winnerId = game.getPlayers().get(1).getId();
+                            // Intentar notificar al servicio multijugador
+                            if (multiplayerService != null && gameId != null) {
+                                multiplayerService.finishMultiplayerGame(gameId, winnerId);
+                            }
+                            endGameByTime(1, 2);
+                            return;
+                        }
                     } else {
-                        player2TimeMs += elapsedNanos / 1_000_000;
+                        player2TimeMs -= elapsedNanos / 1_000_000;
+                        if (player2TimeMs <= 0) {
+                            player2TimeMs = 0;
+                            // Jugador 2 perdió por tiempo
+                            String winnerId = game.getPlayers().get(0).getId();
+                            if (multiplayerService != null && gameId != null) {
+                                multiplayerService.finishMultiplayerGame(gameId, winnerId);
+                            }
+                            endGameByTime(2, 1);
+                            return;
+                        }
                     }
                     updateTimeLabels();
                 }
@@ -625,6 +684,24 @@ public class MultiplayerGameController {
         if (gameTimer != null) {
             gameTimer.stop();
         }
+    }
+
+    private void endGameByTime(int loserPlayerIndex, int winnerPlayerIndex) {
+        gameEnded = true;
+        if (game != null) {
+            game.setState(GameState.FINISHED);
+        }
+
+        String loserName = (loserPlayerIndex == 1) ? player1NameLabel.getText() : player2NameLabel.getText();
+        String winnerName = (winnerPlayerIndex == 1) ? player1NameLabel.getText() : player2NameLabel.getText();
+
+        String result = "⏱️ ¡Tiempo agotado! " + loserName + " se quedó sin tiempo.\n" + winnerName + " gana.";
+        statusLabel.setText(result);
+        LOGGER.log(Level.INFO, "Partida multijugador finalizada por tiempo: " + result);
+
+        stopGameTimer();
+        // Mostrar diálogo local
+        showVictoryDialog(winnerName, loserName + " (Tiempo agotado)");
     }
 
     private void updateTimeLabels() {

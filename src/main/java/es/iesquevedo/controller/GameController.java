@@ -35,6 +35,8 @@ public class GameController {
     private static final Logger LOGGER = Logger.getLogger(GameController.class.getName());
     private static final int BOARD_SIZE = 9;
     private static final int CELL_SIZE = 50;
+    private static final long INITIAL_TIME_MS = 180_000; // 3 minutos en milisegundos (predeterminado)
+    private static long testTimeMs = 0; // Para tests: 0 = usar INITIAL_TIME_MS, >0 = usar este valor
 
     @FXML private Label player1NameLabel;
     @FXML private Label player1ScoreLabel;
@@ -51,8 +53,8 @@ public class GameController {
     private String player1Name = "Jugador 1";
     private String player2Name = "Jugador 2";
     private String matchingPlayerName = "Jugador";
-    private long player1TimeMs = 0;
-    private long player2TimeMs = 0;
+    private long player1TimeMs;
+    private long player2TimeMs;
     private AnimationTimer gameTimer;
     private long lastTime = 0;
     private boolean gameEnded = false;
@@ -79,12 +81,27 @@ public class GameController {
         // o createLocalGame() si es necesario
         boardCanvas.setOnMouseClicked(this::onBoardClick);
     }
+
+    /**
+     * Configura el tiempo inicial para tests. Si timeMsForTest > 0, usa ese valor.
+     * Si timeMsForTest = 0, usa el tiempo predeterminado (3 minutos).
+     */
+    public static void setTestTimeMs(long timeMsForTest) {
+        testTimeMs = timeMsForTest;
+    }
     
     /**
      * Crea un juego local (para use solo si no se inicia desde Firebase)
      */
     private void createLocalGame() {
         LOGGER.log(Level.INFO, "Creando juego local");
+        
+        // Determinar tiempo inicial
+        long initialTime = (testTimeMs > 0) ? testTimeMs : INITIAL_TIME_MS;
+        player1TimeMs = initialTime;
+        player2TimeMs = initialTime;
+        
+        LOGGER.log(Level.INFO, "Tiempo inicial para ambos jugadores: " + (initialTime / 1000) + " segundos");
         
         // Crear juego con dos jugadores locales
         Player player1 = new Player("1", player1Name);
@@ -752,7 +769,8 @@ public class GameController {
     
     private void endGame() {
         gameEnded = true;
-        game.setState(GameState.FINISHED);
+        if (game != null) game.setState(GameState.FINISHED);
+        moveInProgress = false;
         
         // Calcular puntuación final
         Board board = game.getBoard();
@@ -774,10 +792,11 @@ public class GameController {
         String result = String.format("Partida finalizada. %s gana %.1f - %.1f", 
             winner, Math.max(blackScore, whiteScore), Math.min(blackScore, whiteScore));
         
-        statusLabel.setText(result);
-        LOGGER.log(Level.INFO, result);
-        
-        stopGameTimer();
+        Platform.runLater(() -> {
+            statusLabel.setText(result);
+            LOGGER.log(Level.INFO, result);
+            stopGameTimer();
+        });
     }
 
     private void startGameTimer() {
@@ -794,9 +813,21 @@ public class GameController {
 
                 if (!gameEnded) {
                     if (game.getCurrentPlayerIndex() == 0) {
-                        player1TimeMs += elapsedNanos / 1_000_000;
+                        player1TimeMs -= elapsedNanos / 1_000_000;
+                        // Verificar si el jugador 1 se quedó sin tiempo
+                        if (player1TimeMs <= 0) {
+                            player1TimeMs = 0;
+                            endGameByTime(1, 2); // Jugador 1 pierde, Jugador 2 gana
+                            return;
+                        }
                     } else {
-                        player2TimeMs += elapsedNanos / 1_000_000;
+                        player2TimeMs -= elapsedNanos / 1_000_000;
+                        // Verificar si el jugador 2 se quedó sin tiempo
+                        if (player2TimeMs <= 0) {
+                            player2TimeMs = 0;
+                            endGameByTime(2, 1); // Jugador 2 pierde, Jugador 1 gana
+                            return;
+                        }
                     }
                     updateTimeLabels();
                 }
@@ -809,6 +840,26 @@ public class GameController {
         if (gameTimer != null) {
             gameTimer.stop();
         }
+    }
+
+    /**
+     * Finaliza la partida porque un jugador se quedó sin tiempo
+     * @param loserPlayerIndex Índice del jugador que perdió (1 o 2)
+     * @param winnerPlayerIndex Índice del jugador ganador (1 o 2)
+     */
+    private void endGameByTime(int loserPlayerIndex, int winnerPlayerIndex) {
+        gameEnded = true;
+        game.setState(GameState.FINISHED);
+        
+        String loserName = (loserPlayerIndex == 1) ? player1Name : player2Name;
+        String winnerName = (winnerPlayerIndex == 1) ? player1Name : player2Name;
+        
+        String result = "⏱️ ¡Tiempo agotado! " + loserName + " se quedó sin tiempo.\n" + winnerName + " gana.";
+        statusLabel.setText(result);
+        
+        LOGGER.log(Level.INFO, "Partida finalizada por tiempo: " + result);
+        
+        stopGameTimer();
     }
 
     private void updateTimeLabels() {

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="es.iesquevedo.ui.MainScreenController"
+      spacing="20"
+      alignment="TOP_CENTER">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="InazumaGo - Principal" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+    <HBox spacing="20" alignment="CENTER">
+        <Button fx:id="randomMatchButton" text="🔀 Emparejamiento Aleatorio" onAction="#onRandomMatch"/>
+        <Button text="🔄 Actualizar Jugadores" onAction="#onRefreshPlayers"/>
+    </HBox>
+
+    <Label text="Jugadores Conectados:" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+    <ListView fx:id="playersListView" VBox.vgrow="ALWAYS"/>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Retar a jugador seleccionado" onAction="#onChallengeSelected"/>
+    </HBox>
+
+    <Label text="(Los datos son de ejemplo - integrar con backend después)" style="-fx-font-size: 12px; -fx-text-fill: gray;"/>
+</VBox>

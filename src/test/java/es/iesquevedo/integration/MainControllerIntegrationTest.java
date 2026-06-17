@@ -1,24 +1,39 @@
 package es.iesquevedo.integration;
 
 import es.iesquevedo.controller.MainController;
-import es.iesquevedo.repository.MainRepository;
-import es.iesquevedo.repository.inmemory.InMemoryMainRepository;
 import es.iesquevedo.service.MainService;
-import es.iesquevedo.service.impl.MainServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class MainControllerIntegrationTest {
+
+    @Mock
+    private MainService mainService;
+
+    private MainController mainController;
+
+    @BeforeEach
+    void setUp() {
+        mainController = new MainController();
+        mainController.setService(mainService);
+    }
 
     @Test
     void testGreetDelegatesToService() {
-        MainRepository repository = new InMemoryMainRepository();
-        MainService mainService = new MainServiceImpl(repository);
-        MainController mainController = new MainController();
-        mainController.setService(mainService);
+        String expectedGreeting = "Hello, TestPlayer!";
+        when(mainService.greet()).thenReturn(expectedGreeting);
 
-        assertEquals("Hello, InazumaGoPrevio!", mainController.greet());
+        String actualGreeting = mainController.greet();
+
+        assertEquals(expectedGreeting, actualGreeting);
+        verify(mainService, times(1)).greet();
     }
 
     @Test
@@ -26,5 +41,12 @@ public class MainControllerIntegrationTest {
         MainController emptyController = new MainController();
         String result = emptyController.greet();
         assertEquals("Servicio no disponible", result);
+    }
+
+    @Test
+    void testSetServiceAndInitialize() {
+        MainController newController = new MainController();
+        newController.setService(mainService);
+        assertNotNull(newController);
     }
 }

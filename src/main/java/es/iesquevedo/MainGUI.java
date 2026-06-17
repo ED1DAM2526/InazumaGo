@@ -1,7 +1,7 @@
 package es.iesquevedo;
 
 import es.iesquevedo.controller.LoginController;
-import es.iesquevedo.service.auth.AuthServiceMock;
+import es.iesquevedo.service.impl.AuthServiceImpl;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,27 +17,28 @@ public class MainGUI extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Cargar FXML de Login con su controlador
+            // Cargar pantalla de login
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
-            Parent root = (Parent) loader.load();
-            
-            // Obtener el controlador después de cargar el FXML
-            LoginController loginController = loader.getController();
-            
-            // Inyectar el servicio de autenticación (mock para desarrollo)
-            loginController.setAuthService(new AuthServiceMock());
+            Parent root = loader.load();
 
-            // Crear escena y mostrar ventana
-            Scene scene = new Scene(root, 600, 400);
+            // Configurar LoginController
+            LoginController controller = loader.getController();
+            controller.setAuthService(new AuthServiceImpl());
+
+            Scene scene = new Scene(root, 1200, 800);
             primaryStage.setTitle("InazumaGo - Login");
             primaryStage.setScene(scene);
+            primaryStage.setMaximized(true);
             primaryStage.show();
 
-            if (LOGGER.isLoggable(Level.INFO)) {
-                LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada exitosamente (Login)");
-            }
+            LOGGER.log(Level.INFO, "Aplicación JavaFX iniciada - Pantalla de login cargada");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al iniciar la aplicación", e);
+            e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }

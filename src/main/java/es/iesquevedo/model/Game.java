@@ -15,6 +15,10 @@ public class Game {
     private String winnerPlayerId;
     private LocalDateTime createdAt;
     private LocalDateTime finishedAt;
+    private Board board;
+    private List<Move> moves;
+    private int consecutivePasses;
+    private Board lastBoardState;
 
     public Game(String name, Player player1) {
         this.id = UUID.randomUUID().toString();
@@ -27,9 +31,14 @@ public class Game {
         this.winnerPlayerId = null;
         this.createdAt = LocalDateTime.now();
         this.finishedAt = null;
+        this.board = new Board();
+        this.moves = new ArrayList<>();
+        this.consecutivePasses = 0;
+        this.lastBoardState = null;
     }
 
     public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
     public String getName() { return name; }
     public List<Player> getPlayers() { return players; }
     public GameState getState() { return state; }
@@ -44,6 +53,13 @@ public class Game {
     public void setWinnerPlayerId(String playerId) { this.winnerPlayerId = playerId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getFinishedAt() { return finishedAt; }
+    public Board getBoard() { return board; }
+    public List<Move> getMoves() { return moves; }
+    public int getConsecutivePasses() { return consecutivePasses; }
+    public void incrementConsecutivePasses() { this.consecutivePasses++; }
+    public void resetConsecutivePasses() { this.consecutivePasses = 0; }
+    public Board getLastBoardState() { return lastBoardState; }
+    public void setLastBoardState(Board boardState) { this.lastBoardState = boardState; }
 
     public void addPlayer(Player player) {
         if (state != GameState.WAITING) {
@@ -61,6 +77,9 @@ public class Game {
         }
         this.state = GameState.IN_PROGRESS;
         this.currentPlayerIndex = 0;
+        this.board = new Board(); // Reinicializar tablero limpio
+        this.moves = new ArrayList<>();
+        this.consecutivePasses = 0;
     }
 
     public void nextTurn() {
@@ -82,4 +101,3 @@ public class Game {
         this.finishedAt = LocalDateTime.now();
     }
 }
-

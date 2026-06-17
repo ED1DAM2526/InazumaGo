@@ -21,7 +21,7 @@ public class MainServiceImpl implements MainService {
     @Override
     public String greet() {
         String name = repository.findDefaultName();
-        if (name == null || name.isBlank()) {
+        if (name == null || name.trim().isEmpty()) {
             throw new NotFoundException("Default player name not found");
         }
         return name.endsWith("!") ? "Hello, " + name : "Hello, " + name + "!";
